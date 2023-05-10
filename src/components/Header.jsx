@@ -21,6 +21,7 @@ function Header() {
                     {user ? (
                         <>
                             <Link to="/">Inicio</Link>
+                            <Link to="/solicitar">Solicitar</Link>
                             <button type="button" className='btnLogout' onClick={handleSignout}>
                                 <MdLogout />
                             </button>
