@@ -22,7 +22,6 @@ function Header() {
                         <>
                             <Link to="/">Inicio</Link>
                             <Link to="/solicitar">Solicitar</Link>
-                            <Link to="/gestion">Gestión</Link>
                             <button type="button" className='btnLogout' onClick={handleSignout}>
                                 <MdLogout />
                             </button>

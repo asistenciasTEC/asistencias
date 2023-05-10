@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, updateDoc, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, updateDoc, orderBy, deleteDoc, addDoc } from "firebase/firestore";
 import { Table, Modal, Form, Button, Pagination, Row, Col } from "react-bootstrap";
 import { db } from "../config/firebase/firebase";
 import { v4 as uuid } from "uuid";
@@ -8,7 +8,7 @@ import { v4 as uuid } from "uuid";
 import { toast, ToastContainer } from "react-toastify";
 
 //librería de iconos boostrap para react
-import { MdAddBox, MdEdit, MdDelete, MdInfo} from "react-icons/md";
+import { MdAddBox, MdEdit, MdDelete} from "react-icons/md";
 
 function Solicitar() {
   const [solicitudes, setSolicitudes] = useState([]);
