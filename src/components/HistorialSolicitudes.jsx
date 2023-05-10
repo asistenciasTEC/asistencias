@@ -1,62 +1,79 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, serverTimestamp, getDocs, addDoc, updateDoc, deleteDoc, orderBy } from "firebase/firestore";
-import { Table, Modal, Form, Button, Pagination } from "react-bootstrap";
+import { collection, query, where, getDocs, updateDoc, deleteDoc, orderBy } from "firebase/firestore";
+import { Table, Modal, Form, Button, Pagination, Row, Col } from "react-bootstrap";
 import { db } from "../config/firebase/firebase";
-import { v4 as uuid } from 'uuid';
 
 //librería de mensajes información
 import { toast, ToastContainer } from "react-toastify";
 
 //librería de iconos boostrap para react
-import { MdAddBox, MdEdit, MdDelete } from "react-icons/md";
+import { MdEdit, MdDelete } from "react-icons/md";
 
 const HistorialSolicitudes = () => {
-    const [periodos, setPeriodos] = useState([]);
+    const userPrueba = "harold@gmail.com"
+
+    const [solicitudes, setSolicitudes] = useState([]);
+
+    const [asistencias, setAsistencias] = useState([]);
+    const [cursos, setCursos] = useState([]);
+    const [profesores, setProfesores] = useState([]);
+
     const [dataForm, setDataForm] = useState({
         id: "",
-        year: "",
-        semestre: "",
-        horasAsistente: "",
-        horasEspecial: "",
-        horasEstudiante: "",
-        horasTutoria: "",
+        tipoAsistencia: "",
+        cedula: "",
+        carne: "",
+        apellido1: "",
+        apellido2: "",
+        nombre: "",
+        promedioPondSemAnt: "",
+        créditosAproSemAnt: "",
+        semestresActivo: "",
+        correo: "",
+        telefono: "",
+        cuentaBancaria: "",
+        cuentaIBAN: "",
+        profesorAsistir: "",
+        cursoAsistir: "",
+        notaCursoAsistir: "",
+        horario: "",
+        boleta: "",
+        condicion: "",
+        horasAsignadas: "",
         fecha: ""
     });
 
     const [showModalEliminar, setShowModalEliminar] = useState(false);
-    const [periodoAEliminar, setPeriodoAELiminar] = useState("");
+    const [solicitudAEliminar, setSolicitudAELiminar] = useState("");
 
     const [showModalEditar, setShowModalEditar] = useState(false);
-    const [periodoAEditar, setPeriodoAEditar] = useState("");
+    const [solicitudAEditar, setSolicitudAEditar] = useState("");
 
     const [showModal, setShowModal] = useState(false);
-    const [modalTitle, setModalTitle] = useState("");
-    const [modalAction, setModalAction] = useState("");
     const [resultados, setResultados] = useState([]);
     const [valorSeleccionado, setValorSeleccionado] = useState("");
 
     const {
         id,
-        year,
-        semestre,
-        horasAsistente,
-        horasEspecial,
-        horasEstudiante,
-        horasTutoria,
-        fecha
+        tipoAsistencia,
+        cedula,
+        carne,
+        apellido1,
+        apellido2,
+        nombre,
+        promedioPondSemAnt,
+        créditosAproSemAnt,
+        semestresActivo,
+        correo,
+        telefono,
+        cuentaBancaria,
+        cuentaIBAN,
+        profesorAsistir,
+        cursoAsistir,
+        notaCursoAsistir,
+        horario,
+        boleta,
     } = dataForm;
-
-    useEffect(() => {
-        const obtenerPeriodos = async () => {
-            const queryPeriodosCollection = query(collection(db, "periodos"), orderBy("fecha", "desc"));
-            const snapshot = await getDocs(queryPeriodosCollection);
-            const listaPeriodos = snapshot.docs.map((doc) => ({
-                ...doc.data(),
-            }));
-            setPeriodos(listaPeriodos);
-        };
-        obtenerPeriodos();
-    }, []);
 
     const handleChange = (e) => {
         setDataForm({
@@ -65,61 +82,98 @@ const HistorialSolicitudes = () => {
         })
     }
 
+    useEffect(() => {
+        const obtenerSolicitudes = async () => {
+            const querySolicitudesCollection = query(collection(db, "solicitudes"), where("correo", "==", userPrueba), orderBy("fecha", "desc"));
+            const snapshot = await getDocs(querySolicitudesCollection);
+            const listaSolicitudes = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setSolicitudes(listaSolicitudes);
+        };
+
+        const obtenerAsistencias = async () => {
+            const asistenciasCollection = collection(db, "asistencias");
+            const snapshot = await getDocs(asistenciasCollection);
+            const listaAsistencias = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setAsistencias(listaAsistencias);
+        };
+
+        const obtenerCursos = async () => {
+            const cursosCollection = collection(db, "cursos");
+            const snapshot = await getDocs(cursosCollection);
+            const listaCursos = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setCursos(listaCursos);
+        };
+
+        const obtenerProfesores = async () => {
+            const profesoresCollection = collection(db, "profesores");
+            const snapshot = await getDocs(profesoresCollection);
+            const listaProfesores = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setProfesores(listaProfesores);
+        };
+
+        obtenerSolicitudes();
+        obtenerAsistencias();
+        obtenerCursos();
+        obtenerProfesores();
+    }, []);
+
     //Confirm update
     const handleUpdateClick = (e) => {
         e.preventDefault();
-        setPeriodoAEditar(e);
+        setSolicitudAEditar(e);
         cerrarModal();
         setShowModalEditar(true);
     };
 
     const handleConfirmUpdate = () => {
-        editarPeriodo(periodoAEditar);
+        editarSolicitud(solicitudAEditar);
         setShowModalEditar(false);
     };
 
     //Confirm delete
     const handleDeleteClick = (id) => {
-        setPeriodoAELiminar(id);
+        setSolicitudAELiminar(id);
         setShowModalEliminar(true);
     };
 
     const handleConfirmDelete = () => {
-        eliminarPeriodo(periodoAEliminar);
+        eliminarSolicitud(solicitudAEliminar);
         setShowModalEliminar(false);
     };
 
-    //Modal Form
-    const abrirModal = (accion, id) => {
-        if (accion === "agregar") {
-            setModalTitle("Agregar periodo");
-            setModalAction("Agregar");
-            setDataForm({
-                id: "",
-                year: "",
-                semestre: "",
-                horasAsistente: "",
-                horasEspecial: "",
-                horasEstudiante: "",
-                horasTutoria: "",
-                fecha: ""
-            });
-
-        } else if (accion === "editar") {
-            const periodo = periodos.find((periodo) => periodo.id === id);
-            setModalTitle("Editar periodo");
-            setModalAction("Guardar cambios");
-            setDataForm({
-                id: periodo.id,
-                year: periodo.year,
-                semestre: periodo.semestre,
-                horasAsistente: periodo.horasAsistente,
-                horasEspecial: periodo.horasEspecial,
-                horasEstudiante: periodo.horasEstudiante,
-                horasTutoria: periodo.horasTutoria,
-                fecha: periodo.fecha
-            });
-        }
+    const abrirModal = (id) => {
+        const solicitud = solicitudes.find((solicitud) => solicitud.id === id);
+        setDataForm({
+            id: solicitud.id,
+            tipoAsistencia: solicitud.tipoAsistencia,
+            cedula: solicitud.cedula,
+            carne: solicitud.carne,
+            apellido1: solicitud.apellido1,
+            apellido2: solicitud.apellido2,
+            nombre: solicitud.nombre,
+            promedioPondSemAnt: solicitud.promedioPondSemAnt,
+            créditosAproSemAnt: solicitud.créditosAproSemAnt,
+            correo: solicitud.correo,
+            telefono: solicitud.telefono,
+            cuentaBancaria: solicitud.cuentaBancaria,
+            cuentaIBAN: solicitud.cuentaIBAN,
+            profesorAsistir: solicitud.profesorAsistir,
+            cursoAsistir: solicitud.cursoAsistir,
+            notaCursoAsistir: solicitud.notaCursoAsistir,
+            horario: solicitud.horario,
+            boleta: solicitud.boleta,
+            condicion: solicitud.condicion,
+            horasAsignadas: solicitud.horasAsignadas,
+            fecha: solicitud.fecha
+        });
         setShowModal(true);
     };
 
@@ -127,155 +181,166 @@ const HistorialSolicitudes = () => {
         setShowModal(false);
     };
 
-    //Buscar function
-    function buscarPeriodo(year, semestre) {
-        for (let i = 0; i < periodos.length; i++) {
-            if (periodos[i].year === year && periodos[i].semestre === semestre) {
-                return periodos[i];
-            }
-            return null;
-        }
-    }
-
-    //CRUD
-    const agregarPeriodo = async (e) => {
+    const editarSolicitud = async (e) => {
         e.preventDefault();
-        const nuevoPeriodo = {
-            id: uuid(),
-            year,
-            semestre,
-            horasAsistente,
-            horasEspecial,
-            horasEstudiante,
-            horasTutoria,
-            fecha: serverTimestamp()
+        const solicitudActualizada = {
+            tipoAsistencia,
+            cedula,
+            carne,
+            apellido1,
+            apellido2,
+            nombre,
+            promedioPondSemAnt,
+            créditosAproSemAnt,
+            correo,
+            telefono,
+            cuentaBancaria,
+            cuentaIBAN,
+            profesorAsistir,
+            cursoAsistir,
+            notaCursoAsistir,
+            horario,
+            boleta
         };
-
-        if (buscarPeriodo(year, semestre) === null || periodos.length === 0) {
-            await addDoc(collection(db, "periodos"), nuevoPeriodo);
-            setPeriodos([nuevoPeriodo, ...periodos]);
-            toast.success("Periodo agregado exitosamente.");
-            cerrarModal();
-        } else {
-            toast.error("El Periodo a agregar ya existe");
-        }
-    };
-
-    const editarPeriodo = async (e) => {
-        e.preventDefault();
-        const periodoActualizado = { year, semestre, horasAsistente, horasEspecial, horasEstudiante, horasTutoria, fecha };
-        const q = query(collection(db, "periodos"), where("id", "==", id));
+        const q = query(collection(db, "solicitudes"), where("id", "==", id));
         const querySnapshot = await getDocs(q);
 
         querySnapshot.forEach((doc) => {
-            updateDoc(doc.ref, periodoActualizado)
+            updateDoc(doc.ref, solicitudActualizada)
                 .then(() => {
-                    toast.success("Periodo editado exitosamente.");
+                    toast.success("Solicitud editada exitosamente.");
                 })
                 .catch((error) => {
                     toast.error("Ha ocurrido un error.");
                 });
         });
-        const listaPeriodosActualizada = periodos.map((periodo) =>
-            periodo.id === id ? { id: id, ...periodoActualizado } : periodo
+        const listaSolicitudsActualizada = solicitudes.map((solicitud) =>
+            solicitud.id === id ? { id: id, ...solicitudActualizada } : solicitud
         );
-        setPeriodos(listaPeriodosActualizada);
+        setSolicitudes(listaSolicitudsActualizada);
     };
 
-    const eliminarPeriodo = async (id) => {
-        const q = query(collection(db, "periodos"), where("id", "==", id));
+    const eliminarSolicitud = async (id) => {
+        const q = query(collection(db, "solicitudes"), where("id", "==", id));
         const querySnapshot = await getDocs(q);
 
         querySnapshot.forEach((doc) => {
             deleteDoc(doc.ref)
                 .then(() => {
-                    toast.success("Periodo eliminado exitosamente.");
+                    toast.success("Solicitud eliminada exitosamente.");
                 })
                 .catch((error) => {
                     toast.error("Ha ocurrido un error.");
                 });
         });
-        const listaPeriodosActualizada = periodos.filter((periodo) => periodo.id !== id);
-        setPeriodos(listaPeriodosActualizada);
+        const listaSolicitudesActualizada = solicitudes.filter((solicitud) => solicitud.id !== id);
+        setSolicitudes(listaSolicitudesActualizada);
     };
 
     //Paginación
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
     const totalPages =
         resultados.length > 0
             ? Math.ceil(resultados.length / itemsPerPage)
-            : Math.ceil(periodos.length / itemsPerPage);
+            : Math.ceil(solicitudes.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentItems =
         resultados.length > 0
             ? resultados.slice(startIndex, endIndex)
-            : periodos.slice(startIndex, endIndex);
+            : solicitudes.slice(startIndex, endIndex);
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
 
+    //Busqueda
     const buscarEnLista = (terminoBusqueda) => {
         const resultadosBusq = [];
         if (
             valorSeleccionado === "default" ||
             valorSeleccionado === ""
         ) {
-            for (let i = 0; i < periodos.length; i++) {
+            for (let i = 0; i < solicitudes.length; i++) {
                 if (
-                    periodos[i].year.toLowerCase() === terminoBusqueda.toLowerCase() ||
-                    periodos[i].semestre.toLowerCase() === terminoBusqueda.toLowerCase() ||
-                    periodos[i].horasAsistente.toLowerCase() === terminoBusqueda.toLowerCase() ||
-                    periodos[i].horasEspecial.toLowerCase() === terminoBusqueda.toLowerCase() ||
-                    periodos[i].horasEstudiante.toLowerCase() === terminoBusqueda.toLowerCase() ||
-                    periodos[i].horasTutoria.toLowerCase() === terminoBusqueda.toLowerCase()
-
+                    solicitudes[i].carne.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].nombre.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].apellido1.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].apellido2.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    (solicitudes[i].nombre + ' ' + solicitudes[i].apellido1 + ' ' + solicitudes[i].apellido2).toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].tipoAsistencia.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].cursoAsistir.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].profesorAsistir.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].condicion.toLowerCase() === terminoBusqueda.toLowerCase()
                 ) {
-                    resultadosBusq.push(periodos[i]);
+                    resultadosBusq.push(solicitudes[i]);
                 }
             }
-        } else if (valorSeleccionado === "year") {
-            for (let i = 0; i < periodos.length; i++) {
-                if (periodos[i].year === terminoBusqueda) {
-                    resultadosBusq.push(periodos[i]);
+        }
+        if (valorSeleccionado === "carne") {
+            for (let i = 0; i < solicitudes.length; i++) {
+                if (solicitudes[i].carne.toLowerCase() === terminoBusqueda.toLowerCase()
+                ) {
+                    resultadosBusq.push(solicitudes[i]);
                 }
             }
-        } else if (valorSeleccionado === "semestre") {
-            for (let i = 0; i < periodos.length; i++) {
-                if (periodos[i].semestre === terminoBusqueda) {
-                    resultadosBusq.push(periodos[i]);
+        }
+        if (valorSeleccionado === "nombre") {
+            for (let i = 0; i < solicitudes.length; i++) {
+
+                if (
+                    solicitudes[i].nombre.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].apellido1.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    solicitudes[i].apellido2.toLowerCase() === terminoBusqueda.toLowerCase() ||
+                    (solicitudes[i].nombre + ' ' + solicitudes[i].apellido1 + ' ' + solicitudes[i].apellido2).toLowerCase() === terminoBusqueda.toLowerCase()
+                ) {
+                    resultadosBusq.push(solicitudes[i]);
                 }
             }
-        } else if (valorSeleccionado === "horasAsistente") {
-            for (let i = 0; i < periodos.length; i++) {
-                if (periodos[i].horasAsistente === terminoBusqueda) {
-                    resultadosBusq.push(periodos[i]);
+        }
+        if (valorSeleccionado === "tipoAsistencia") {
+            for (let i = 0; i < solicitudes.length; i++) {
+                if (solicitudes[i].tipoAsistencia.toLowerCase() === terminoBusqueda.toLowerCase()
+                ) {
+                    resultadosBusq.push(solicitudes[i]);
                 }
             }
-        } else if (valorSeleccionado === "horasEspecial") {
-            for (let i = 0; i < periodos.length; i++) {
-                if (periodos[i].horasEspecial === terminoBusqueda) {
-                    resultadosBusq.push(periodos[i]);
+        }
+        if (valorSeleccionado === "cursoAsistir") {
+            for (let i = 0; i < solicitudes.length; i++) {
+                if (solicitudes[i].cursoAsistir.toLowerCase() === terminoBusqueda.toLowerCase()
+                ) {
+                    resultadosBusq.push(solicitudes[i]);
                 }
             }
-        } else if (valorSeleccionado === "horasEstudiante") {
-            for (let i = 0; i < periodos.length; i++) {
-                if (periodos[i].horasEstudiante === terminoBusqueda) {
-                    resultadosBusq.push(periodos[i]);
+        }
+        if (valorSeleccionado === "profesorAsistir") {
+            for (let i = 0; i < solicitudes.length; i++) {
+                if (solicitudes[i].profesorAsistir.toLowerCase() === terminoBusqueda.toLowerCase()
+                ) {
+                    resultadosBusq.push(solicitudes[i]);
                 }
             }
-        } else if (valorSeleccionado === "horasTutoria") {
-            for (let i = 0; i < periodos.length; i++) {
-                if (periodos[i].horasTutoria === terminoBusqueda) {
-                    resultadosBusq.push(periodos[i]);
+        }
+        if (valorSeleccionado === "condicion") {
+            for (let i = 0; i < solicitudes.length; i++) {
+                if (solicitudes[i].condicion.toLowerCase() === terminoBusqueda.toLowerCase()
+                ) {
+                    resultadosBusq.push(solicitudes[i]);
+                }
+            }
+        }
+        if (valorSeleccionado === "horasAsignadas") {
+            for (let i = 0; i < solicitudes.length; i++) {
+                if (solicitudes[i].horasAsignadas.toLowerCase() === terminoBusqueda.toLowerCase()
+                ) {
+                    resultadosBusq.push(solicitudes[i]);
                 }
             }
         }
         setResultados(resultadosBusq);
     };
-
     const handleBusqueda = (event) => {
         const terminoBusqueda = event.target.value;
         buscarEnLista(terminoBusqueda);
@@ -288,82 +353,68 @@ const HistorialSolicitudes = () => {
     return (
         <div className="container-lg ">
             <h1>Historial de Solicitudes</h1>
-            <div className="row">
-                {/* <div className="col">
-                    <Button
-                        className="px-2 py-1 mb-2 fs-5"
-                        variant="primary"
-                        onClick={() => abrirModal("agregar")}
-                    >
-                        <MdAddBox />
-                    </Button>
-                </div> */}
-                <div className="col">
-                    <div className="row">
-                        <div className="col">
-                            <Form.Select
-                                aria-label="Default select example"
-                                onChange={handleSelectChange}
-                            >
-                                <option value="default">Filtros</option>
-                                <option value="year">Por Año</option>
-                                <option value="semestre">Por Semestre</option>
-                                <option value="horasAsistente">Por Horas Asistente</option>
-                                <option value="horasEspecial">Por Horas Especial</option>
-                                <option value="horasEstudiante">Por Horas Estudiante</option>
-                                <option value="horasTutoria">Por Horas Tutoría</option>
-                            </Form.Select>
-                        </div>
-                        <div className="col">
-                            <Form.Control
-                                type="search"
-                                placeholder="Buscar"
-                                className="me-2"
-                                aria-label="Search"
-                                onChange={handleBusqueda}
-                            />
-                        </div>
-                    </div>
+            <div className="row mb-2 justify-content-end">
+                <div className="col-3">
+                    <Form.Select aria-label="Default select example"
+                        onChange={handleSelectChange}>
+                        <option value="default">Filtros</option>
+                        <option value="carne">Por Carné</option>
+                        <option value="nombre">Por Nombre</option>
+                        <option value="tipoAsistencia">Por Tipo de asistencia</option>
+                        <option value="cursoAsistir">Por Curso a asistir</option>
+                        <option value="profesorAsistir">Por Profesor a asistir</option>
+                        <option value="condicion">Por Condición</option>
+                        <option value="horasAsignadas">Por Horas asignadas</option>
+                    </Form.Select>
+                </div>
+                <div className="col-3">
+                    <Form.Control
+                        type="search"
+                        placeholder="Buscar"
+                        className="me-2"
+                        aria-label="Search"
+                        onChange={handleBusqueda}
+                    />
                 </div>
             </div>
 
             <Table striped bordered hover>
                 <thead className="table-dark table-bg-scale-50">
                     <tr>
-                        <th>Año</th>
-                        <th>Semestre</th>
-                        <th>Horas Asistente</th>
-                        <th>Horas Especial</th>
-                        <th>Horas Estudiante</th>
-                        <th>Horas Tutoría</th>
+                        <th>Tipo de Asistencia</th>
+                        <th>Curso</th>
+                        <th>Profesor</th>
+                        <th>Condición</th>
+                        <th>Horas asignadas</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {currentItems.map((periodo) => (
-                        <tr key={periodo.id}>
-                            <td>{periodo.year}</td>
-                            <td>{periodo.semestre}</td>
-                            <td>{periodo.horasAsistente}</td>
-                            <td>{periodo.horasEspecial}</td>
-                            <td>{periodo.horasEstudiante}</td>
-                            <td>{periodo.horasTutoria}</td>
-                            <td>
-                                <Button
-                                    className="px-2 py-1 mx-1 fs-5"
-                                    variant="warning"
-                                    onClick={() => abrirModal("editar", periodo.id)}
-                                >
-                                    <MdEdit />
-                                </Button>
-                                <Button
-                                    className="px-2 py-1 mx-1 fs-5"
-                                    variant="danger"
-                                    onClick={() => handleDeleteClick(periodo.id)}
-                                >
-                                    <MdDelete />
-                                </Button>
-                            </td>
+                    {currentItems.map((solicitud) => (
+                        <tr key={solicitud.id}>
+                            <td>{solicitud.tipoAsistencia}</td>
+                            <td>{solicitud.cursoAsistir}</td>
+                            <td>{solicitud.profesorAsistir}</td>
+                            <td>{solicitud.condicion}</td>
+                            <td>{solicitud.horasAsignadas}</td>
+                            {solicitud.condicion === 'Pendiente' && (
+                                <td>
+                                    <Button
+                                        className="px-2 py-1 mx-1 fs-5"
+                                        variant="warning"
+                                        onClick={() => abrirModal(solicitud.id)}
+                                    >
+                                        <MdEdit />
+                                    </Button>
+                                    <Button
+                                        className="px-2 py-1 mx-1 fs-5"
+                                        variant="danger"
+                                        onClick={() => handleDeleteClick(solicitud.id)}
+                                    >
+                                        <MdDelete />
+                                    </Button>
+                                </td>
+                            )}
                         </tr>
                     ))}
                 </tbody>
@@ -397,7 +448,7 @@ const HistorialSolicitudes = () => {
                     <Modal.Title>Confirmar eliminación</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    ¿Estás seguro de que quieres eliminar este periodo?
+                    ¿Estás seguro de que quieres eliminar esta solicitud?
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
@@ -420,7 +471,7 @@ const HistorialSolicitudes = () => {
                     <Modal.Title>Confirmar edición</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    ¿Estás seguro de que quieres editar este periodo?
+                    ¿Estás seguro de que quieres editar esta solicitud?
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
@@ -435,105 +486,404 @@ const HistorialSolicitudes = () => {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={showModal} onHide={cerrarModal}>
+            <Modal className="modal-xl" show={showModal} onHide={cerrarModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{modalTitle}</Modal.Title>
+                    <Modal.Title>Editar solicitud</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form id="form1" onSubmit={id ? handleUpdateClick : agregarPeriodo}>
-                        <Form.Group className="mb-3" controlId="year">
-                            <Form.Label>Año</Form.Label>
+                    <Form onSubmit={handleConfirmUpdate}>
+                        <Row>
+                            <Col>
+                                <Form.Group className="mb-3" controlId="apellido1">
+                                    <Form.Label>Primer Apellido</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={apellido1}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="carne">
+                                    <Form.Label>Carné</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={carne}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="cuentaBancaria">
+                                    <Form.Label>Cuenta Bancaria</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="N/A"
+                                        value={cuentaBancaria}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+                            </Col>
+
+                            <Col>
+                                <Form.Group className="mb-3" controlId="apellido2">
+                                    <Form.Label>Segundo Apellido</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={apellido2}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="cedula">
+                                    <Form.Label>Cedula</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={cedula}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="cuentaIBAN">
+                                    <Form.Label>Cuenta IBAN</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="N/A"
+                                        value={cuentaIBAN}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+                            </Col>
+
+                            <Col>
+                                <Form.Group className="mb-3" controlId="nombre">
+                                    <Form.Label>Nombre</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={nombre}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="correo">
+                                    <Form.Label>Correo</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={correo}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="telefono">
+                                    <Form.Label>Telefono</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={telefono}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <Form.Group controlId="tipoAsistencia">
+                            <Form.Label>Tipo de Asistencia</Form.Label>
                             <Form.Control
-                                type="number"
-                                min={1000}
-                                max={9999}
-                                placeholder="Escribe el año del periodo"
-                                value={year}
+                                as="select"
+                                value={tipoAsistencia}
+                                onChange={handleChange}>
+                                <option value="">Seleccionar</option>
+                                {asistencias.map((asistencia) => (
+                                    <option key={asistencia.tipoAsistencia} value={asistencia.tipoAsistencia}>
+                                        {asistencia.tipoAsistencia}
+                                    </option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>
+                        {tipoAsistencia === 'Horas Estudiantes' && (
+                            <>
+                                <Form.Group controlId="promedioPondSemAnt">
+                                    <Form.Label>Promedio Ponderado</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        step="0.01"
+                                        value={promedioPondSemAnt}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group controlId="horario">
+                                    <Form.Label>Horario</Form.Label>
+                                    <Table bordered>
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Lunes</th>
+                                                <th>Martes</th>
+                                                <th>Miércoles</th>
+                                                <th>Jueves</th>
+                                                <th>Viernes</th>
+                                                <th>Sábado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>07:00 - 12:00</td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>12:00 - 17:00</td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>17:00 - 22:00</td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                                <td>
+                                                    <Form.Check type="checkbox" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </Table>
+                                </Form.Group>
+                            </>
+                        )}
+                        {tipoAsistencia === 'Asistencia Especial' && (
+                            <>
+                                <Form.Group controlId="profesorAsistir">
+                                    <Form.Label>Profesor a Asistir</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={profesorAsistir}
+                                        onChange={handleChange}>
+                                        <option value="">Seleccionar</option>
+                                        {profesores.map((profesor) => (
+                                            <option key={profesor.nombre} value={profesor.nombre}>
+                                                {profesor.nombre}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+
+                                <Form.Group controlId="cursoAsistir">
+                                    <Form.Label>Curso a Asistir</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={cursoAsistir}
+                                        onChange={handleChange}>
+                                        <option value="">Seleccionar</option>
+                                        {cursos.map((curso) => (
+                                            <option key={curso.nombre} value={curso.nombre}>
+                                                {curso.nombre}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+
+                                <Form.Group controlId="semestresActivo">
+                                    <Form.Label>Cantidad de Semestres Activo</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={semestresActivo}
+                                        onChange={handleChange} />
+                                </Form.Group>
+
+                                <Form.Group controlId="créditosAproSemAnt">
+                                    <Form.Label>Creditos Aprobados Semestre Anterior</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={créditosAproSemAnt}
+                                        onChange={handleChange} />
+                                </Form.Group>
+                            </>
+                        )}
+                        {tipoAsistencia === 'Tutoria Estudiantil' && (
+                            <>
+                                <Form.Group controlId="cursoAsistir">
+                                    <Form.Label>Curso a Asistir</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={cursoAsistir}
+                                        onChange={handleChange}>
+                                        <option value="">Seleccionar</option>
+                                        {cursos.map((curso) => (
+                                            <option key={curso.nombre} value={curso.nombre}>
+                                                {curso.nombre}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="promedioPondSemAnt">
+                                    <Form.Label>Promedio Ponderado Semestre Anterior</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        step="0.01"
+                                        value={promedioPondSemAnt}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="notaCursoAsistir">
+                                    <Form.Label>Nota Curso a Asistir</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        step="0.01"
+                                        value={notaCursoAsistir}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group controlId="semestresActivo">
+                                    <Form.Label>Cantidad de Semestres Activo</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={semestresActivo}
+                                        onChange={handleChange} />
+                                </Form.Group>
+                            </>
+                        )}
+                        {tipoAsistencia === 'Horas Asistente' && (
+                            <>
+                                <Form.Group controlId="profesorAsistir">
+                                    <Form.Label>Profesor a Asistir</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={profesorAsistir}
+                                        onChange={handleChange}>
+                                        <option value="">Seleccionar</option>
+                                        {profesores.map((profesor) => (
+                                            <option key={profesor.nombre} value={profesor.nombre}>
+                                                {profesor.nombre}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+
+                                <Form.Group controlId="cursoAsistir">
+                                    <Form.Label>Curso a Asistir</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={cursoAsistir}
+                                        onChange={handleChange}>
+                                        <option value="">Seleccionar</option>
+                                        {cursos.map((curso) => (
+                                            <option key={curso.nombre} value={curso.nombre}>
+                                                {curso.nombre}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="promedioPondSemAnt">
+                                    <Form.Label>Promedio Ponderado Semestre Anterior</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        step="0.01"
+                                        value={promedioPondSemAnt}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="notaCursoAsistir">
+                                    <Form.Label>Nota Curso a Asistir</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        step="0.01"
+                                        value={notaCursoAsistir}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            </>
+                        )}
+
+                        <Form.Group controlId="boleta">
+                            <Form.Label>Boleta</Form.Label>
+                            <Form.Control
+                                type="file"
                                 onChange={handleChange}
-                                autoComplete='off'
-                                required
                             />
                         </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="semestre">
-                            <Form.Label>Semestre</Form.Label>
-                            <Form.Control
-                                type="number"
-                                min={1}
-                                max={2}
-                                placeholder="Escribe el semestre del periodo"
-                                value={semestre}
-                                onChange={handleChange}
-                                autoComplete='off'
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="horasAsistente">
-                            <Form.Label>Horas Asistente</Form.Label>
-                            <Form.Control
-                                type="number"
-                                min={1}
-                                max={99999}
-                                placeholder="Escribe la cantidad de horas asistente"
-                                value={horasAsistente}
-                                onChange={handleChange}
-                                autoComplete='off'
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="horasEspecial">
-                            <Form.Label>Horas Especial</Form.Label>
-                            <Form.Control
-                                type="number"
-                                min={1}
-                                max={99999}
-                                placeholder="Escribe la cantidad de horas especial"
-                                value={horasEspecial}
-                                onChange={handleChange}
-                                autoComplete='off'
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="horasEstudiante">
-                            <Form.Label>Horas Estudiante</Form.Label>
-                            <Form.Control
-                                type="number"
-                                min={1}
-                                max={99999}
-                                placeholder="Escribe la cantidad de horas estudiante"
-                                value={horasEstudiante}
-                                onChange={handleChange}
-                                autoComplete='off'
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="horasTutoria">
-                            <Form.Label>Horas Tutoría</Form.Label>
-                            <Form.Control
-                                type="number"
-                                min={1}
-                                max={99999}
-                                placeholder="Escribe la cantidad de horas tutoria"
-                                value={horasTutoria}
-                                onChange={handleChange}
-                                autoComplete='off'
-                                required
-                            />
-                        </Form.Group>
-
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button form="form1" variant="primary" type="submit">
-                        {modalAction}
-                    </Button>{" "}
                     <Button variant="secondary" onClick={cerrarModal}>
                         Cancelar
                     </Button>{" "}
+                    <Button id="botonEditar" form="form1" variant="success" type="submit" onClick={handleUpdateClick}>
+                        Guardar cambios
+                    </Button>
                 </Modal.Footer>
             </Modal>
             <ToastContainer />
