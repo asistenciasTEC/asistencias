@@ -87,7 +87,7 @@ function Solicitar() {
   }
 
   const handleConfirmModify =  () => {
-    editarSolicitud(profesorAModificar);
+    editarSolicitud(solicitudAModificar);
     setShowModalModificar(true);
   };
   const handleDeleteClick = (id) => {
@@ -176,11 +176,11 @@ function Solicitar() {
     setShowModalModificar(false);
   };
 
-  }
   const agregarSolicitud = async (e) => {
     e.preventDefault();
     const nuevaSolicitud = { 
-        id: uuid(), tipoAsistencia,
+        id: uuid(), 
+        tipoAsistencia,
         cedula,
         carne,
         apellido1,
@@ -200,6 +200,7 @@ function Solicitar() {
         condicion,
         horasAsignadas,
         fecha };
+
     const nuevaSoli = {
         id:nuevaSolicitud.id,cedula,
         carne:nuevaSolicitud.carne,
@@ -208,108 +209,192 @@ function Solicitar() {
         nombre:nuevaSolicitud.nombre,
         promedioPondSemAnt:nuevaSolicitud.promedioPondSemAnt,
         créditosAproSemAnt:nuevaSolicitud.créditosAproSemAnt,
-        correo,
-        telefono,
-        cuentaBancaria,
-        cuentaIBAN,
-        profesorAsistir,
-        cursoAsistir,
-        notaCursoAsistir,
-        horario,
-        boleta,
-        condicion,
-        horasAsignadas,
-        fecha}
+        correo:nuevaSolicitud.correo,
+        telefono:nuevaSolicitud.telefono,
+        cuentaBancaria:nuevaSolicitud.cuentaBancaria,
+        cuentaIBAN:nuevaSolicitud.cuentaIBAN,
+        profesorAsistir:nuevaSolicitud.profesorAsistir,
+        cursoAsistir:nuevaSolicitud.cursoAsistir,
+        notaCursoAsistir:nuevaSolicitud.notaCursoAsistir,
+        horario:nuevaSolicitud.horario,
+        boleta:nuevaSolicitud.boleta,
+        condicion:nuevaSolicitud.condicion,
+        horasAsignadas:nuevaSolicitud.horasAsignadas,
+        fecha:nuevaSolicitud.fecha}
     if (solicitudes.length === 0) {
       await addDoc(collection(db, "solicitudes"), nuevaSoli);
-      setProfesores([nuevaSoli,...solicitudes,]);
+      setSolicitudes([nuevaSoli,...solicitudes,]);
       toast.success("Solicitud enviada exitosamente.");
       cerrarModal();
     }
   };
 
-  const editarProfesor = async (e) => {
+  const editarSolicitud = async (e) => {
     e.preventDefault();
-    const profesorActualizado = { nombre, email, password };
-    const q = query(collection(db, "profesores"), where("id", "==", id));
+    const solicitudActualizada = { 
+      tipoAsistencia,
+      cedula,
+      carne,
+      apellido1,
+      apellido2,
+      nombre,
+      promedioPondSemAnt,
+      créditosAproSemAnt,
+      correo,
+      telefono,
+      cuentaBancaria,
+      cuentaIBAN,
+      profesorAsistir,
+      cursoAsistir,
+      notaCursoAsistir,
+      horario,
+      boleta,
+      condicion,
+      horasAsignadas,
+      fecha };
+    const q = query(collection(db, "solicitudes"), where("id", "==", id));
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {
-      updateDoc(doc.ref, profesorActualizado)
+      updateDoc(doc.ref, solicitudActualizada)
         .then(() => {
-          toast.success("Profesor editado exitosamente.");
+          toast.success("Solicitud editada exitosamente.");
         })
         .catch((error) => {
           toast.error("Ha ocurrido un error.");
         });
     });
-    const listaProfesoresActualizada = profesores.map((profesor) =>
-      profesor.id === id ? { id: id, ...profesorActualizado } : profesor
+    const listaSolicitudesActualizada = solicitudes.map((solicitud) =>
+      solicitud.id === id ? { id: id, ...solicitudActualizada } : solicitud
     );
-    setProfesores(listaProfesoresActualizada);
+    setSolicitudes(listaSolicitudesActualizada);
     cerrarModal();
   };
 
-  const eliminarProfesor = async (id) => {
-    const q = query(collection(db, "profesores"), where("id", "==", id));
+  const eliminarSolicitud = async (id) => {
+    const q = query(collection(db, "solicitudes"), where("id", "==", id));
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {
       deleteDoc(doc.ref)
         .then(() => {
-          toast.success("Profesor eliminado exitosamente.");
+          toast.success("Solicitud eliminada exitosamente.");
         })
         .catch((error) => {
           toast.error("Ha ocurrido un error.");
         });
     });
-    const listaProfesoresActualizada = profesores.filter(
-      (profesor) => profesor.id !== id
+    const listaSolicitudesActualizada = solicitudes.filter(
+      (solicitud) => solicitud.id !== id
     );
-    setProfesores(listaProfesoresActualizada);
+    setSolicitudes(listaSolicitudesActualizada);
   };
 
   //Paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
   const totalPages =
     resultados.length > 0
       ? Math.ceil(resultados.length / itemsPerPage)
-      : Math.ceil(profesores.length / itemsPerPage);
+      : Math.ceil(solicitudes.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems =
     resultados.length > 0
       ? resultados.slice(startIndex, endIndex)
-      : profesores.slice(startIndex, endIndex);
+      : solicitudes.slice(startIndex, endIndex);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
+  //Busqueda
   const buscarEnLista = (terminoBusqueda) => {
     const resultadosBusq = [];
     if (
       valorSeleccionado === "default" ||
-      valorSeleccionado === "nombre" ||
       valorSeleccionado === ""
     ) {
-      for (let i = 0; i < profesores.length; i++) {
+      for (let i = 0; i < solicitudes.length; i++) {
         if (
-          profesores[i].nombre.toLowerCase() === terminoBusqueda.toLowerCase()
+          solicitudes[i].carne.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].nombre.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].apellido1.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].apellido2.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          (solicitudes[i].nombre + ' ' + solicitudes[i].apellido1 + ' ' + solicitudes[i].apellido2).toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].tipoAsistencia.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].cursoAsistir.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].profesorAsistir.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].condicion.toLowerCase() === terminoBusqueda.toLowerCase()
         ) {
-          resultadosBusq.push(profesores[i]);
+          resultadosBusq.push(solicitudes[i]);
         }
       }
     }
-    if (valorSeleccionado === "correo") {
-      for (let i = 0; i < profesores.length; i++) {
-        if(profesores[i].email.toLowerCase()===terminoBusqueda.toLowerCase()){
-          resultadosBusq.push(profesores[i]);
+    if (valorSeleccionado === "carne") {
+      for (let i = 0; i < solicitudes.length; i++) {
+        if (solicitudes[i].carne.toLowerCase() === terminoBusqueda.toLowerCase()
+        ) {
+          resultadosBusq.push(solicitudes[i]);
+        }
+      }
+    }
+    if (valorSeleccionado === "nombre") {
+      for (let i = 0; i < solicitudes.length; i++) {
+
+        if (
+          solicitudes[i].nombre.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].apellido1.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          solicitudes[i].apellido2.toLowerCase() === terminoBusqueda.toLowerCase() ||
+          (solicitudes[i].nombre + ' ' + solicitudes[i].apellido1 + ' ' + solicitudes[i].apellido2).toLowerCase() === terminoBusqueda.toLowerCase()
+        ) {
+          resultadosBusq.push(solicitudes[i]);
+        }
+      }
+    }
+    if (valorSeleccionado === "tipoAsistencia") {
+      for (let i = 0; i < solicitudes.length; i++) {
+        if (solicitudes[i].tipoAsistencia.toLowerCase() === terminoBusqueda.toLowerCase()
+        ) {
+          resultadosBusq.push(solicitudes[i]);
+        }
+      }
+    }
+    if (valorSeleccionado === "cursoAsistir") {
+      for (let i = 0; i < solicitudes.length; i++) {
+        if (solicitudes[i].cursoAsistir.toLowerCase() === terminoBusqueda.toLowerCase()
+        ) {
+          resultadosBusq.push(solicitudes[i]);
+        }
+      }
+    }
+    if (valorSeleccionado === "profesorAsistir") {
+      for (let i = 0; i < solicitudes.length; i++) {
+        if (solicitudes[i].profesorAsistir.toLowerCase() === terminoBusqueda.toLowerCase()
+        ) {
+          resultadosBusq.push(solicitudes[i]);
+        }
+      }
+    }
+    if (valorSeleccionado === "condicion") {
+      for (let i = 0; i < solicitudes.length; i++) {
+        if (solicitudes[i].condicion.toLowerCase() === terminoBusqueda.toLowerCase()
+        ) {
+          resultadosBusq.push(solicitudes[i]);
+        }
+      }
+    }
+    if (valorSeleccionado === "horasAsignadas") {
+      for (let i = 0; i < solicitudes.length; i++) {
+        if (solicitudes[i].horasAsignadas.toLowerCase() === terminoBusqueda.toLowerCase()
+        ) {
+          resultadosBusq.push(solicitudes[i]);
         }
       }
     }
     setResultados(resultadosBusq);
   };
+  
   const handleBusqueda = (event) => {
     const terminoBusqueda = event.target.value;
     buscarEnLista(terminoBusqueda);
@@ -320,7 +405,7 @@ function Solicitar() {
   }
   return (
     <div className="container-lg ">
-      <h1>Profesores</h1>
+      <h1>Solicitar</h1>
       <div className="row">
         <div className="col">
           <Button
@@ -334,13 +419,16 @@ function Solicitar() {
         <div className="col">
           <div className="row">
             <div className="col">
-              <Form.Select
-                aria-label="Default select example"
-                onChange={handleSelectChange}
-              >
-                <option value="default">Filtros</option>
-                <option value="nombre">Por Nombre</option>
-                <option value="correo">Por Correo</option>
+              <Form.Select aria-label="Default select example"
+              onChange={handleSelectChange}>
+              <option value="default">Filtros</option>
+              <option value="carne">Por Carné</option>
+              <option value="nombre">Por Nombre</option>
+              <option value="tipoAsistencia">Por Tipo de asistencia</option>
+              <option value="cursoAsistir">Por Curso a asistir</option>
+              <option value="profesorAsistir">Por Profesor a asistir</option>
+              <option value="condicion">Por Condición</option>
+              <option value="horasAsignadas">Por Horas asignadas</option>
               </Form.Select>
             </div>
             <div className="col">
@@ -357,30 +445,40 @@ function Solicitar() {
       </div>
 
       <Table striped bordered hover>
-        <thead className="table-dark table-bg-scale-50">
+      <thead className="table-dark table-bg-scale-50">
           <tr>
-            <th>Nombre completo</th>
-            <th>Correo Electrónico</th>
+            <th>Carné</th>
+            <th>Nombre</th>
+            <th>Tipo de Asistencia</th>
+            <th>Curso</th>
+            <th>Profesor</th>
+            <th>Condición</th>
+            <th>Horas asignadas</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {currentItems.map((profesor) => (
-            <tr key={profesor.id}>
-              <td>{profesor.nombre}</td>
-              <td>{profesor.email}</td>
+          {currentItems.map((solicitud) => (
+            <tr key={solicitud.id}>
+              <td>{solicitud.carne}</td>
+              <td>{solicitud.nombre} {solicitud.apellido1} {solicitud.apellido2}</td>
+              <td>{solicitud.tipoAsistencia}</td>
+              <td>{solicitud.cursoAsistir}</td>
+              <td>{solicitud.profesorAsistir}</td>
+              <td>{solicitud.condicion}</td>
+              <td>{solicitud.horasAsignadas}</td>
               <td>
                 <Button
                   className="px-2 py-1 mx-1 fs-5"
                   variant="warning"
-                  onClick={() => abrirModal("editar", profesor.id)}
+                  onClick={() => abrirModal("editar", solicitud.id)}
                 >
                   <MdEdit />
                 </Button>
                 <Button
                   className="px-2 py-1 mx-1 fs-5"
                   variant="danger"
-                  onClick={() => handleDeleteClick(profesor.id)}
+                  onClick={() => handleDeleteClick(solicitud.id)}
                 >
                   <MdDelete />
                 </Button>
@@ -418,7 +516,7 @@ function Solicitar() {
           <Modal.Title>Confirmar eliminación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          ¿Estás seguro de que quieres eliminar este profesor?
+          ¿Estás seguro de que quieres eliminar esta solicitud?
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -440,7 +538,7 @@ function Solicitar() {
           <Modal.Title>Confirmar modificación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          ¿Estás seguro de que quieres modificar este profesor?
+          ¿Estás seguro de que quieres modificar esta solicitud?
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -461,41 +559,253 @@ function Solicitar() {
           <Modal.Title>{modalTitle}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form id="form1" onSubmit={id ? handleModifyClick : agregarProfesor}>
-            <Form.Group className="mb-3" controlId="nombre">
-              <Form.Label>Nombre completo</Form.Label>
+          <Form id="form1" onSubmit={id ? handleModifyClick : agregarSolicitud}>
+          <Row>
+              <Col>
+                <Form.Group className="mb-3" controlId="apellido1">
+                  <Form.Label>Primer Apellido</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={apellido1}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="carne">
+                  <Form.Label>Carné</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={carne}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="cuentaBancaria">
+                  <Form.Label>Cuenta Bancaria</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="N/A"
+                    value={cuentaBancaria}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="tipoAsistencia">
+                  <Form.Label>Tipo de Asistencia</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={tipoAsistencia}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="promedioPondSemAnt">
+                  <Form.Label>Promedio Ponderado Semestre Anterior</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="N/A"
+                    value={promedioPondSemAnt}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="horario">
+                  <Form.Label>Horario</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Aqui va a ir el horario"
+                    value={horario}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col>
+                <Form.Group className="mb-3" controlId="apellido2">
+                  <Form.Label>Segundo Apellido</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={apellido2}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="cedula">
+                  <Form.Label>Cedula</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={cedula}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="cuentaIBAN">
+                  <Form.Label>Cuenta IBAN</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="N/A"
+                    value={cuentaIBAN}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="profesorAsistir">
+                  <Form.Label>Profesor a Asistir</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="N/A"
+                    value={profesorAsistir}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="créditosAproSemAnt">
+                  <Form.Label>Creditos Aprobados Semestre Anterior</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="N/A"
+                    value={créditosAproSemAnt}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="boleta">
+                  <Form.Label>Boleta</Form.Label>
+                  <Form.Control
+                    type="jpg"
+                    placeholder="Aqui va a ir la boleta"
+                    value={boleta}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col>
+                <Form.Group className="mb-3" controlId="nombre">
+                  <Form.Label>Nombre</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={nombre}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="correo">
+                  <Form.Label>Correo</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={correo}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="telefono">
+                  <Form.Label>Telefono</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={telefono}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="cursoAsistir">
+                  <Form.Label>Curso a Asistir</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="N/A"
+                    value={cursoAsistir}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="notaCursoAsistir">
+                  <Form.Label>Nota Curso a Asistir</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="N/A"
+                    value={notaCursoAsistir}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="condicion">
+                  <Form.Label>Condicion</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={condicion}
+                    onChange={handleChange}
+                    autoComplete='off'
+                    required
+                    disabled
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3" controlId="horasAsignadas">
+              <Form.Label>Horas Asignadas</Form.Label>
               <Form.Control
-                type="text"
-                placeholder="Escribe el nombre completo del profesor"
-                value={nombre}
+                type="number"
+                min={0}
+                max={10}
+                value={horasAsignadas}
                 onChange={handleChange}
-                autoComplete="off"
+                autoComplete='off'
                 required
               />
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Correo Electrónico</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Escribe el correo electrónico del profesor"
-                value={email}
-                onChange={handleChange}
-                autoComplete="off"
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="password">
-              <Form.Label>Contraseña</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Escribe la contraseña del profesor"
-                value={password}
-                onChange={handleChange}
-                required={!id}
-              />
-            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
