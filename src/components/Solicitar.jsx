@@ -187,7 +187,7 @@ function Solicitar() {
                 </div>
             </div>
 
-            <Modal show={showModal} onHide={cerrarModal}>
+            <Modal show={showModal} onHide={cerrarModal} className="modal-xl">
                 <Modal.Header closeButton>
                     <Modal.Title>{modalTitle}</Modal.Title>
                 </Modal.Header>
