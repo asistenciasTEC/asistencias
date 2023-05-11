@@ -7,7 +7,7 @@ import { db } from "../config/firebase/firebase";
 import { toast, ToastContainer } from "react-toastify";
 
 //librería de iconos boostrap para react
-import { MdEdit, MdDelete } from "react-icons/md";
+import { MdInfo, MdEdit, MdDelete } from "react-icons/md";
 
 const HistorialSolicitudes = () => {
     const userPrueba = "harold@gmail.com"
@@ -42,6 +42,9 @@ const HistorialSolicitudes = () => {
         horasAsignadas: "",
         fecha: ""
     });
+
+    const [showModalMoreInfo, setShowModalMoreInfo] = useState(false);
+    const [solicitudInfo, setSolicitudInfo] = useState("");
 
     const [showModalEliminar, setShowModalEliminar] = useState(false);
     const [solicitudAEliminar, setSolicitudAELiminar] = useState("");
@@ -124,6 +127,13 @@ const HistorialSolicitudes = () => {
         obtenerCursos();
         obtenerProfesores();
     }, []);
+
+    //More Info
+    const abrirModalInfo = (id) => {
+        const solicitud = solicitudes.find((solicitud) => solicitud.id === id);
+        setSolicitudInfo(solicitud.condicion);
+        setShowModalMoreInfo(true);
+    };
 
     //Confirm update
     const handleUpdateClick = (e) => {
@@ -397,7 +407,7 @@ const HistorialSolicitudes = () => {
                             <td>{solicitud.profesorAsistir}</td>
                             <td>{solicitud.condicion}</td>
                             <td>{solicitud.horasAsignadas}</td>
-                            {solicitud.condicion === 'Pendiente' && (
+                            {solicitud.condicion === 'Pendiente' ? (
                                 <td>
                                     <Button
                                         className="px-2 py-1 mx-1 fs-5"
@@ -412,6 +422,16 @@ const HistorialSolicitudes = () => {
                                         onClick={() => handleDeleteClick(solicitud.id)}
                                     >
                                         <MdDelete />
+                                    </Button>
+                                </td>
+                            ) : (
+                                <td>
+                                    <Button
+                                        className="px-2 py-1 mx-1 fs-5"
+                                        variant="info"
+                                        onClick={() => abrirModalInfo(solicitud.id)}
+                                    >
+                                        <MdInfo />
                                     </Button>
                                 </td>
                             )}
@@ -439,6 +459,26 @@ const HistorialSolicitudes = () => {
                     onClick={() => handlePageChange(currentPage + 1)}
                 />
             </Pagination>
+
+            <Modal
+                show={showModalMoreInfo}
+                onHide={() => setShowModalMoreInfo(false)}
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Información de la Solicitud</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Su solicitud se encuentra en la condición de: <strong>{solicitudInfo}</strong>, para más información por favor comunicarse con el encargado.
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="success"
+                        onClick={() => setShowModalMoreInfo(false)}
+                    >
+                        ¡Entendido!
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
             <Modal
                 show={showModalEliminar}
