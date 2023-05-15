@@ -65,8 +65,8 @@ function Header() {
                 <div className='Scroll'>
                     {user ? (
                         <>
-                            {!bandera && <Link to="/">Inicio</Link>}
-                            {bandera && <Link to="/Prueba">Not</Link>}
+                            <Link to="/">Inicio</Link>
+                            {bandera && <Link to="/solicitar">Solicitar</Link>}
                             <MdManageAccounts type="button" className="btnLogin" onClick={handleRoute} />
                             <MdLogout type="button" className='btnLogout' onClick={handleSignout} />
                         </>
