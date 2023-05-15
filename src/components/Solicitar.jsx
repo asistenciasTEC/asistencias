@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
+import { collection, query, addDoc, getDocs, serverTimestamp, orderBy } from "firebase/firestore";
 import { Table, Modal, Form, Button, Row, Col } from "react-bootstrap";
 import { db } from "../config/firebase/firebase";
 import { v4 as uuid } from "uuid";
@@ -15,6 +15,7 @@ function Solicitar() {
     const [asistencias, setAsistencias] = useState([]);
     const [cursos, setCursos] = useState([]);
     const [profesores, setProfesores] = useState([]);
+    const [periodos, setPeriodos] = useState([]);
 
     const [dataForm, setDataForm] = useState({
         id: "",
@@ -97,6 +98,16 @@ function Solicitar() {
             setCursos(listaCursos);
         };
         obtenerCursos();
+
+        const obtenerPeriodos = async () => {
+            const queryPeriodosCollection = query(collection(db, "periodos"), orderBy("fecha", "desc"));
+            const snapshot = await getDocs(queryPeriodosCollection);
+            const listaPeriodos = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setPeriodos(listaPeriodos);
+        };
+        obtenerPeriodos();
     }, []);
 
     const handleChange = (e) => {
@@ -140,36 +151,42 @@ function Solicitar() {
     };
 
     const agregarSolicitud = async (e) => {
-        console.log("Hola")
         e.preventDefault();
-        const nuevaSolicitud = {
-            id: uuid(),
-            tipoAsistencia,
-            cedula,
-            carne,
-            apellido1,
-            apellido2,
-            nombre,
-            promedioPondSemAnt,
-            créditosAproSemAnt,
-            semestresActivo,
-            correo,
-            telefono,
-            cuentaBancaria,
-            cuentaIBAN,
-            profesorAsistir,
-            cursoAsistir,
-            notaCursoAsistir,
-            horario,
-            boleta,
-            condicion,
-            horasAsignadas,
-            fecha: serverTimestamp()
-        };
-        await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
-        setSolicitudes([nuevaSolicitud, ...solicitudes,]);
-        toast.success("Solicitud enviada exitosamente.");
-        cerrarModal()
+
+        const hayPeriodosActivos = periodos.some((periodo) => periodo.estado);
+
+        if (hayPeriodosActivos === true) {
+            const nuevaSolicitud = {
+                id: uuid(),
+                tipoAsistencia,
+                cedula,
+                carne,
+                apellido1,
+                apellido2,
+                nombre,
+                promedioPondSemAnt,
+                créditosAproSemAnt,
+                semestresActivo,
+                correo,
+                telefono,
+                cuentaBancaria,
+                cuentaIBAN,
+                profesorAsistir,
+                cursoAsistir,
+                notaCursoAsistir,
+                horario,
+                boleta,
+                condicion,
+                horasAsignadas,
+                fecha: serverTimestamp()
+            };
+            await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
+            setSolicitudes([nuevaSolicitud, ...solicitudes,]);
+            toast.success("Solicitud enviada exitosamente.");
+            cerrarModal()
+        } else {
+            toast.error("No hay periodos activos.");
+        }
     };
 
     return (
