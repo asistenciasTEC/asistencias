@@ -17,7 +17,6 @@ const Login = () => {
         errorButton1: null,
         loading: false,
     });
-
     const [dataForm, setDataForm] = useState({
         nombre: "",
         correo: "",
@@ -30,9 +29,9 @@ const Login = () => {
         telefono: "",
         cuentaBancaria: "",
         cuentaIBAN: "",
+        cuentaBanco: "",
         password2: ""
     });
-
     const {
         nombre,
         correo,
@@ -45,56 +44,55 @@ const Login = () => {
         telefono,
         cuentaBancaria,
         cuentaIBAN,
+        cuentaBanco,
         password2
     } = dataForm;
-
     const history = useNavigate();
-
     const { email, password, errorButton1, loading } = data;
-
-
-
     const handleChange = (e) => {
         e.preventDefault();
         setData({ ...data, [e.target.name]: e.target.value });
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setData({ ...data, errorButton1: null, loading: true });
-
-        if ((!email || !password) /*|| email === "vargasdaniel195@gmail.com"*/) {
+        if ((!email || !password) || email === "vargasdaniel195@gmail.com") {
             setData({ ...data, errorButton1: "Todos los campos son obligatorios" });
 
         }
         try {
-            //if (email !== "vargasdaniel195@gmail.com") {
-            await signInWithEmailAndPassword(auth, email, password);
-            setData({
-                email: "",
-                password: "",
-                errorButton1: null,
-                loading: false,
-            });
-            history("/");
-            // }
+            if (email !== "vargasdaniel195@gmail.com") {
+                await signInWithEmailAndPassword(auth, email, password);
+                setData({
+                    email: "",
+                    password: "",
+                    errorButton1: null,
+                    loading: false,
+                });
+                history("/");
+            }
         } catch (errorButton1) {
             setData({ ...data, errorButton1: errorButton1.message, loading: false });
         }
     };
 
-    const restablecerContraseña = (e) => {
-        sendPasswordResetEmail(auth, email);
-    }
+    const restablecerContraseña = async (e) => {
+        sendPasswordResetEmail(auth, email)
+            .then(() => {
+                toast.success("Se envio un correo de restablecimiento de contraseña");
+            })
+            .catch((error) => {
+                toast.error("Tiene que añadir un correo en el espacio designado");
+            });
+    };
+
     const handleRegistro = (e) => {
         e.preventDefault();
         setDataForm({ ...dataForm, [e.target.name]: e.target.value });
     };
-
     const handleTerminos = (event) => {
         setTerminosYCondiciones(event.target.checked);
     };
-
     const handleSubmitRegistro = async (e) => {
         e.preventDefault();
         const nuevoUsuario = {
@@ -108,17 +106,16 @@ const Login = () => {
             telefono,
             cuentaBancaria,
             cuentaIBAN,
+            cuentaBanco,
             password2,
-            terminosYCondiciones,
-            rol: "usuario"
+            terminosYCondiciones
         }
-
         if (((!nuevoUsuario.carne || !nuevoUsuario.correo || !nuevoUsuario.password2) && !terminosYCondiciones) || (terminosYCondiciones && (!nuevoUsuario.carne || !nuevoUsuario.correo || !nuevoUsuario.password2))) {
             setDataForm({ ...dataForm, errorButton2: "Todos los campos son obligatorios" });
         }
-
         try {
             await createUserWithEmailAndPassword(auth, nuevoUsuario.correo, nuevoUsuario.password2)
+
             await addDoc(collection(db, "usuarios"), nuevoUsuario);
             toast.success("Usuario agregado exitosamente.");
             cerrarModal();
@@ -126,13 +123,10 @@ const Login = () => {
         catch (errorButton2) {
             setDataForm({ ...dataForm, errorButton2: errorButton2.message, loading2: false });
         }
-
     };
-
     const abrirModal = () => {
         setShowModal(true);
     };
-
     const cerrarModal = () => {
         setShowModal(false);
     };
@@ -165,13 +159,11 @@ const Login = () => {
                             {loading ? "Ingresando..." : "Ingresar"}
                         </button>
                     </div>
-
                     <div className="btn_container">
-                        <a href="/" type="button" onClick={() => {
+                        <button href="/" type="button" className="btn_restablecer" onClick={() => {
                             restablecerContraseña();
-                        }}>¿Olvido su contraseña?</a>
+                        }}>¿Olvido su contraseña?</button >
                     </div>
-
                     <div className="btn_container">
                         <button id="crear-cuenta" className="btn-success btn-sm" type="button" onClick={() => {
                             abrirModal();
@@ -219,7 +211,6 @@ const Login = () => {
                                             name="apellido1"
                                         />
                                     </Form.Group>
-
                                     <Form.Group className="mb-3" controlId="apellido2">
                                         <Form.Label>Segundo Apellido</Form.Label>
                                         <Form.Control
@@ -240,7 +231,16 @@ const Login = () => {
                                             name="cedula"
                                         />
                                     </Form.Group>
-
+                                    <Form.Group className="mb-3" controlId="password2">
+                                        <Form.Label>Contraseña</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Escribe la contraseña"
+                                            value={password2}
+                                            onChange={handleRegistro}
+                                            name="password2"
+                                        />
+                                    </Form.Group>
                                 </Col>
                                 <Col>
                                     <Form.Group className="mb-3" controlId="carne">
@@ -271,34 +271,31 @@ const Login = () => {
                                             name="cuentaBancaria"
                                         >
                                             <option value="">Selecciona un banco</option>
-                                            <option value="BCR">Banco de Costa Rica</option>
-                                            <option value="BN">Banco Nacional de Costa Rica</option>
-                                            <option value="BP">Banco Popular</option>
-
+                                            <option value="Banco de Costa Rica">Banco de Costa Rica</option>
+                                            <option value="Banco Nacional">Banco Nacional</option>
+                                            <option value="Banco Popular">Banco Popular</option>
                                         </Form.Select>
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="cuentaIBAN">
-                                        <Form.Label>Numero de cuenta</Form.Label>
+                                        <Form.Label>Numero IBAN</Form.Label>
                                         <Form.Control
                                             type="text"
-                                            placeholder="Escribe el numero de cuenta"
+                                            placeholder="Escribe el numero de cuenta IBAN"
                                             value={cuentaIBAN}
                                             onChange={handleRegistro}
                                             name="cuentaIBAN"
                                         />
                                     </Form.Group>
-                                    <Form.Group className="mb-3" controlId="password2">
-                                        <Form.Label>Contraseña</Form.Label>
+                                    <Form.Group className="mb-3" controlId="cuentaBanco">
+                                        <Form.Label>Numero de cuenta</Form.Label>
                                         <Form.Control
                                             type="text"
-                                            placeholder="Escribe la contraseña"
-                                            value={password2}
+                                            placeholder="Escribe el numero de cuenta"
+                                            value={cuentaBanco}
                                             onChange={handleRegistro}
-                                            name="password2"
+                                            name="cuentaBanco"
                                         />
                                     </Form.Group>
-
-
                                 </Col>
                             </Row>
                             <Form.Group className="mb-3" controlId="terminosYCondiciones">
@@ -309,21 +306,16 @@ const Login = () => {
                                     onChange={handleTerminos}
                                 />
                             </Form.Group>
-
                             {errorButton2 ? <p className="error">{"Los campos no pueden estar vacios."}</p> : null}
-
                             <div className="btn_container2">
                                 <Button variant="secondary" onClick={() => {
                                     cerrarModal();
                                 }}>
                                     Atras
                                 </Button>
-
                                 <Button variant="primary" type="Submit" disabled={loading2}>
                                     {loading2 ? "Registrando..." : "Registrar"}
-
                                 </Button>
-
                             </div>
                         </Form>
                     </Modal.Body>
@@ -333,5 +325,4 @@ const Login = () => {
         </div>
     );
 };
-
 export default Login;
