@@ -75,9 +75,17 @@ const Login = () => {
             setData({ ...data, errorButton1: errorButton1.message, loading: false });
         }
     };
-    const restablecerContraseña = (e) => {
-        sendPasswordResetEmail(auth, email);
-    }
+
+    const restablecerContraseña = async (e) => {
+        sendPasswordResetEmail(auth, email)
+            .then(() => {
+                toast.success("Se envio un correo de restablecimiento de contraseña");
+            })
+            .catch((error) => {
+                toast.error("Tiene que añadir un correo en el espacio designado");
+            });
+    };
+
     const handleRegistro = (e) => {
         e.preventDefault();
         setDataForm({ ...dataForm, [e.target.name]: e.target.value });
@@ -152,9 +160,9 @@ const Login = () => {
                         </button>
                     </div>
                     <div className="btn_container">
-                        <a href="/" type="button" onClick={() => {
+                        <button href="/" type="button" className="btn_restablecer" onClick={() => {
                             restablecerContraseña();
-                        }}>¿Olvido su contraseña?</a>
+                        }}>¿Olvido su contraseña?</button >
                     </div>
                     <div className="btn_container">
                         <button id="crear-cuenta" className="btn-success btn-sm" type="button" onClick={() => {
