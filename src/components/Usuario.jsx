@@ -36,6 +36,7 @@ function Usuario() {
             telefono: "",
             cuentaBancaria: "",
             cuentaIBAN: "",
+            cuenta: "",
             password2: ""
         });
     useEffect(() => {
@@ -108,6 +109,7 @@ function Usuario() {
             telefono: datosUsuario.telefono,
             cuentaBancaria: datosUsuario.cuentaBancaria,
             cuentaIBAN: datosUsuario.cuentaIBAN,
+            cuenta: datosUsuario.cuenta,
             password2: ""
         };
         try {
@@ -215,8 +217,6 @@ function Usuario() {
                                         name="cedula"
                                     />
                                 </Form.Group>
-                            </Col>
-                            <Col>
                                 <Form.Group className="mb-3" controlId="carne">
                                     <Form.Label>Carne</Form.Label>
                                     <Form.Control
@@ -226,6 +226,8 @@ function Usuario() {
                                         name="carne"
                                     />
                                 </Form.Group>
+                            </Col>
+                            <Col>
                                 <Form.Group className="mb-3" controlId="telefono">
                                     <Form.Label>Telefono</Form.Label>
                                     <Form.Control
@@ -250,12 +252,21 @@ function Usuario() {
                                     </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="cuentaIBAN">
-                                    <Form.Label>Numero de cuenta</Form.Label>
+                                    <Form.Label>Numero IBAN</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={datosUsuario.cuentaIBAN}
                                         onChange={handleRegistro}
                                         name="cuentaIBAN"
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="cuenta">
+                                    <Form.Label>Numero de cuenta</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={datosUsuario.cuenta}
+                                        onChange={handleRegistro}
+                                        name="cuenta"
                                     />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="cambioContraseña">
