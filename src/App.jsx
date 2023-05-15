@@ -2,11 +2,11 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Inicio from "./components/Inicio";
+import Usuario from "./components/Usuario";
 import Login from "./components/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import AuthProvider from "./contexts/AuthContext";
 import NotFound from "./components/NotFound";
-import HistorialSolicitudes from './components/HistorialSolicitudes';
 
 function App() {
   return (
@@ -19,8 +19,8 @@ function App() {
             <Route exact path="/" element={<PrivateRoute />}>
               <Route path="/" element={<Inicio />} />
             </Route>
-            <Route exact path="/historialSolicitudes" element={<PrivateRoute />}>
-              <Route path="/historialSolicitudes" element={<HistorialSolicitudes />} />
+            <Route exact path="/usuario" element={<PrivateRoute />}>
+              <Route path="/usuario" element={<Usuario />} />
             </Route>
             <Route exact path="*" element={<NotFound />} />
           </Routes>
