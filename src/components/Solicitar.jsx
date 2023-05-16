@@ -152,14 +152,8 @@ function Solicitar() {
 
     const agregarSolicitud = async (e) => {
         e.preventDefault();
-
-        console.log("Hola")
         const hayPeriodosActivos = periodos.some((periodo) => periodo.estado);
-
-        console.log(hayPeriodosActivos)
-
         if (hayPeriodosActivos === true) {
-            console.log("Entro al if")
             const nuevaSolicitud = {
                 id: uuid(),
                 tipoAsistencia,
@@ -189,8 +183,8 @@ function Solicitar() {
             toast.success("Solicitud enviada exitosamente.");
             cerrarModal()
         } else {
-            console.log("No entro al if")
             toast.error("No hay periodos activos.");
+            cerrarModal()
         }
     };
 
