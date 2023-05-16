@@ -12,7 +12,6 @@ body {
     justify-content: space-between;
 }
 
-
 .NavContainer h2 {
     font-weight: 200;
     color: white;
@@ -23,8 +22,6 @@ body {
     text-decoration: none;
     margin-right: 1rem;
 }
-
-
 
 .Scroll a:hover {
     color: white;
@@ -45,8 +42,14 @@ body {
     margin-bottom: 0.5rem;
 }
 
-
 /*   Login */
+.btn_restablecer {
+    border: None;
+    background: none;
+    color: blue;
+    display: flex;
+    justify-content: center;
+}
 
 section {
     display: flex;
@@ -55,7 +58,6 @@ section {
     align-items: center;
     height: 100vh;
 }
-
 
 .form {
     display: flex;
@@ -115,8 +117,6 @@ input {
     }
 }
 
-
-
 /* Inicio */
 
 .contenedor {
@@ -156,7 +156,6 @@ input {
     ;
 }
 
-
 /* Registro */
 
 #crear-cuenta {
@@ -182,7 +181,6 @@ input {
     background-color: #4b4f4c;
     border-color: #4b4f4c;
 }
-
 
 .btn_container2 {
     display: flex;
