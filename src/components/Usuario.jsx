@@ -36,6 +36,7 @@ function Usuario() {
             telefono: "",
             cuentaBancaria: "",
             cuentaIBAN: "",
+            cuenta: "",
             password2: ""
         });
     useEffect(() => {
@@ -91,7 +92,7 @@ function Usuario() {
                     toast.success(mensaje);
                 })
                 .catch((error) => {
-                    toast.error("Ha ocurrido un error.");
+                    toast.error("Ha ocurrido un error");
                 });
         });
     }
@@ -108,6 +109,7 @@ function Usuario() {
             telefono: datosUsuario.telefono,
             cuentaBancaria: datosUsuario.cuentaBancaria,
             cuentaIBAN: datosUsuario.cuentaIBAN,
+            cuenta: datosUsuario.cuenta,
             password2: ""
         };
         try {
@@ -120,7 +122,7 @@ function Usuario() {
                 })
             } else if (cambioContraseña.nuevaContraseña === "" && cambioContraseña.confirmacionContraseña === "") {
                 usuarioActualizado.password2 = datosUsuario.password2;
-                actualizar("usuarios", datosUsuario, usuarioActualizado, "El usuario se actualizo correctamente");
+                actualizar("usuarios", datosUsuario, usuarioActualizado, "El usuario se actualizó correctamente");
 
             } else {
                 throw new Error("Las contraseñas no son iguales o son iguales a la contraseña actual");
@@ -152,7 +154,7 @@ function Usuario() {
                 })
             } else if (cambioContraseña.nuevaContraseña === "" && cambioContraseña.confirmacionContraseña === "") {
                 profesorActualizado.password = datosProfesor.password;
-                actualizar("profesores", datosProfesor, profesorActualizado, "El profesor se actualizo correctamente");
+                actualizar("profesores", datosProfesor, profesorActualizado, "El profesor se actualizó correctamente");
 
             } else {
                 throw new Error("Las contraseñas no son iguales o son iguales a la contraseña actual");
@@ -207,7 +209,7 @@ function Usuario() {
                                     />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="cedula">
-                                    <Form.Label>Cedula</Form.Label>
+                                    <Form.Label>Cédula</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={datosUsuario.cedula}
@@ -215,10 +217,8 @@ function Usuario() {
                                         name="cedula"
                                     />
                                 </Form.Group>
-                            </Col>
-                            <Col>
                                 <Form.Group className="mb-3" controlId="carne">
-                                    <Form.Label>Carne</Form.Label>
+                                    <Form.Label>Carné</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={datosUsuario.carne}
@@ -226,8 +226,10 @@ function Usuario() {
                                         name="carne"
                                     />
                                 </Form.Group>
+                            </Col>
+                            <Col>
                                 <Form.Group className="mb-3" controlId="telefono">
-                                    <Form.Label>Telefono</Form.Label>
+                                    <Form.Label>Teléfono</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={datosUsuario.telefono}
@@ -250,12 +252,21 @@ function Usuario() {
                                     </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="cuentaIBAN">
-                                    <Form.Label>Numero de cuenta</Form.Label>
+                                    <Form.Label>Número IBAN</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={datosUsuario.cuentaIBAN}
                                         onChange={handleRegistro}
                                         name="cuentaIBAN"
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="cuenta">
+                                    <Form.Label>Número de cuenta</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={datosUsuario.cuenta}
+                                        onChange={handleRegistro}
+                                        name="cuenta"
                                     />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="cambioContraseña">
