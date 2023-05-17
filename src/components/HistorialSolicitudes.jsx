@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { collection, query, where, getDocs, updateDoc, deleteDoc, orderBy } from "firebase/firestore";
 import { Table, Modal, Form, Button, Pagination, Row, Col } from "react-bootstrap";
+import { AuthContext } from '../contexts/AuthContext';
 import { db } from "../config/firebase/firebase";
 
 //librería de mensajes información
@@ -10,7 +11,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { MdInfo, MdEdit, MdDelete } from "react-icons/md";
 
 const HistorialSolicitudes = () => {
-    const userPrueba = "harold@gmail.com"
+    const { user } = useContext(AuthContext);
 
     const [solicitudes, setSolicitudes] = useState([]);
 
@@ -87,7 +88,7 @@ const HistorialSolicitudes = () => {
 
     useEffect(() => {
         const obtenerSolicitudes = async () => {
-            const querySolicitudesCollection = query(collection(db, "solicitudes"), where("correo", "==", userPrueba), orderBy("fecha", "desc"));
+            const querySolicitudesCollection = query(collection(db, "solicitudes"), where("correo", "==", user.email), orderBy("fecha", "desc"));
             const snapshot = await getDocs(querySolicitudesCollection);
             const listaSolicitudes = snapshot.docs.map((doc) => ({
                 ...doc.data(),
@@ -121,7 +122,6 @@ const HistorialSolicitudes = () => {
             }));
             setProfesores(listaProfesores);
         };
-
         obtenerSolicitudes();
         obtenerAsistencias();
         obtenerCursos();

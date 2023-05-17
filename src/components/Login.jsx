@@ -87,13 +87,28 @@ const Login = () => {
                     errorButton1: null,
                     loading: false,
                 });
-                history.push("/");
+                history("/");
             } catch (error) {
-                setData({
-                    ...data,
-                    errorButton1: error.message,
-                    loading: false
-                });
+                if (error.message === "Firebase: Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later. (auth/too-many-requests).") {
+                    setData({
+                        ...data,
+                        errorButton1: 'Su cuenta a sido desabilitada por la cantidad de intentos fallidos, para habilitarla cambie de contraseña con la opcion de "¿Olvido su contraseña?"',
+                        loading: false
+                    });
+                } else if (error.message === "Firebase: Error (auth/wrong-password).") {
+                    setData({
+                        ...data,
+                        errorButton1: "La contraseña o el correo electrónico ingresados son incorrectos, por favor verificalos",
+                        loading: false
+                    });
+                } else {
+                    setData({
+                        ...data,
+                        errorButton1: "A ocurrido un error inesperado por favor recarga la pagina y vuelve a intentarlo",
+                        loading: false
+                    });
+                }
+
             }
         }
 
@@ -214,6 +229,7 @@ const Login = () => {
                                             value={correo}
                                             onChange={handleRegistro}
                                             name="correo"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="nombre">
@@ -224,6 +240,7 @@ const Login = () => {
                                             value={nombre}
                                             onChange={handleRegistro}
                                             name="nombre"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="apellido1">
@@ -234,6 +251,7 @@ const Login = () => {
                                             value={apellido1}
                                             onChange={handleRegistro}
                                             name="apellido1"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="apellido2">
@@ -244,6 +262,7 @@ const Login = () => {
                                             value={apellido2}
                                             onChange={handleRegistro}
                                             name="apellido2"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="cedula">
@@ -254,6 +273,7 @@ const Login = () => {
                                             value={cedula}
                                             onChange={handleRegistro}
                                             name="cedula"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="password2">
@@ -264,6 +284,7 @@ const Login = () => {
                                             value={password2}
                                             onChange={handleRegistro}
                                             name="password2"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                 </Col>
@@ -276,6 +297,7 @@ const Login = () => {
                                             value={carne}
                                             onChange={handleRegistro}
                                             name="carne"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="telefono">
@@ -286,6 +308,7 @@ const Login = () => {
                                             value={telefono}
                                             onChange={handleRegistro}
                                             name="telefono"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="cuentaBancaria">
@@ -309,6 +332,7 @@ const Login = () => {
                                             value={cuentaIBAN}
                                             onChange={handleRegistro}
                                             name="cuentaIBAN"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="cuentaBanco">
@@ -319,6 +343,7 @@ const Login = () => {
                                             value={cuentaBanco}
                                             onChange={handleRegistro}
                                             name="cuentaBanco"
+                                            autoComplete="off"
                                         />
                                     </Form.Group>
                                 </Col>
