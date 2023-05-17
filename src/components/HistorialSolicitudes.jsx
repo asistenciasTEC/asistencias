@@ -126,7 +126,7 @@ const HistorialSolicitudes = () => {
         obtenerAsistencias();
         obtenerCursos();
         obtenerProfesores();
-    }, []);
+    },);
 
     //More Info
     const abrirModalInfo = (id) => {
