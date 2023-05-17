@@ -6,9 +6,10 @@ import { signOut } from 'firebase/auth';
 import { MdLogout, MdManageAccounts } from "react-icons/md";
 import './styles.css';
 import { db } from "../config/firebase/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where, } from "firebase/firestore";
 
 function Header() {
+    const [datosCargados, setDatosCargados] = useState(false);
     const history = useNavigate();
     const { user } = useContext(AuthContext);
     const handleSignout = async () => {
@@ -16,69 +17,63 @@ function Header() {
         history("/login");
     }
 
-    const [bandera, setBandera] = useState(false);
-    const userEmail = user && user.email ? user.email : '';
-    const [usuarios, setUsuarios] = useState([].sort());
-    const [profesores, setProfesores] = useState([].sort());
+    const [bandera, setBandera] = useState();
+
 
     useEffect(() => {
         const obtenerUsuarios = async () => {
-            const usuariosCollection = collection(db, "usuarios");
-            const snapshot = await getDocs(usuariosCollection);
+            const queryUsuariosCollection = query(collection(db, "usuarios"), where("correo", "==", user.email));
+            const snapshot = await getDocs(queryUsuariosCollection);
             const listaUsuarios = snapshot.docs.map((doc) => ({
                 ...doc.data(),
             }));
-            setUsuarios(listaUsuarios);
+
+            if (listaUsuarios.length > 0) {
+                setBandera(true);
+            } else {
+                setBandera(false);
+            }
         };
-        const obtenerProfesores = async () => {
-            const profesoresCollection = collection(db, "profesores");
-            const snapshot = await getDocs(profesoresCollection);
-            const listaProfesores = snapshot.docs.map((doc) => ({
-                ...doc.data(),
-            }));
-            setProfesores(listaProfesores);
-        };
-        obtenerProfesores();
         obtenerUsuarios();
-    }, []);
+        setTimeout(() => {
+            setDatosCargados(true);
+        }, 1000);
+    },);
 
-    useEffect(() => {
-        const usuarioEncontrado = usuarios.find(usuario => usuario.correo === userEmail);
-        const profesorEncontrado = profesores.find(profesor => profesor.email === userEmail);
-        if (usuarioEncontrado) {
-            setBandera(true);
 
-        } else if (profesorEncontrado) {
-            setBandera(false);
-        }
-    }, [profesores, usuarios, userEmail]);
 
     const handleRoute = () => {
         history('/usuario');
     };
 
     return (
-        <header className='App-header'>
-            <div className='NavContainer'>
-                <h2>Sistema de Gestión de Asistencias</h2>
-                <div className='Scroll'>
-                    {user ? (
-                        <>
-                            <Link to="/">Inicio</Link>
-                            {bandera && <Link to="/solicitar">Solicitar</Link>}
-                            {bandera && <Link to="/historialSolicitudes">Historial de solicitudes</Link>}
-                            {bandera && <Link to="/requisitos">Requisitos</Link>}
-                            {!bandera && <Link to="/asistentes">Asistentes</Link>}
-                            <MdManageAccounts type="button" className="btnLogin" onClick={handleRoute} />
-                            <MdLogout type="button" className='btnLogout' onClick={handleSignout} />
-                        </>
-                    ) : (
-                        <>
-                        </>
-                    )}
-                </div>
-            </div>
-        </header>
+        <>
+            {datosCargados && (
+                <>
+                    <header className='App-header'>
+                        <div className='NavContainer'>
+                            <h2>Sistema de Gestión de Asistencias</h2>
+                            <div className='Scroll'>
+                                {user ? (
+                                    <>
+                                        <Link to="/">Inicio</Link>
+                                        {bandera && <Link to="/solicitar">Solicitar</Link>}
+                                        {bandera && <Link to="/historialSolicitudes">Historial de solicitudes</Link>}
+                                        {bandera && <Link to="/requisitos">Requisitos</Link>}
+                                        {!bandera && <Link to="/asistentes">Asistentes</Link>}
+                                        <MdManageAccounts type="button" className="btnLogin" onClick={handleRoute} />
+                                        <MdLogout type="button" className='btnLogout' onClick={handleSignout} />
+                                    </>
+                                ) : (
+                                    <>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </header>
+                </>
+            )}
+        </>
     );
 
 }

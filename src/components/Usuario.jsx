@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { collection, getDocs, updateDoc, query, where, } from "firebase/firestore";
+import { collection, getDocs, updateDoc, query, where } from "firebase/firestore";
 import { AuthContext } from '../contexts/AuthContext';
 import { db } from "../config/firebase/firebase";
 import { toast, ToastContainer } from "react-toastify";
@@ -36,21 +36,21 @@ function Usuario() {
             telefono: "",
             cuentaBancaria: "",
             cuentaIBAN: "",
-            cuenta: "",
+            cuentaBanco: "",
             password2: ""
         });
     useEffect(() => {
         const obtenerUsuarios = async () => {
-            const usuariosCollection = collection(db, "usuarios");
-            const snapshot = await getDocs(usuariosCollection);
+            const queryUsuariosCollection = query(collection(db, "usuarios"), where("correo", "==", user.email));
+            const snapshot = await getDocs(queryUsuariosCollection);
             const listaUsuarios = snapshot.docs.map((doc) => ({
                 ...doc.data(),
             }));
             setUsuarios(listaUsuarios);
         };
         const obtenerProfesores = async () => {
-            const profesoresCollection = collection(db, "profesores");
-            const snapshot = await getDocs(profesoresCollection);
+            const queryProfesoresCollection = query(collection(db, "profesores"), where("email", "==", user.email));
+            const snapshot = await getDocs(queryProfesoresCollection);
             const listaProfesores = snapshot.docs.map((doc) => ({
                 ...doc.data(),
             }));
@@ -58,9 +58,9 @@ function Usuario() {
         };
         obtenerProfesores();
         obtenerUsuarios();
-    }, []);
-    useEffect(() => {
+    },);
 
+    useEffect(() => {
         const usuarioEncontrado = usuarios.find(usuario => usuario.correo === userEmail);
         const profesorEncontrado = profesores.find(profesor => profesor.email === userEmail);
         if (usuarioEncontrado) {
@@ -72,8 +72,9 @@ function Usuario() {
         }
         setTimeout(() => {
             setDatosCargados(true);
-        }, 700);
+        }, 2000);
     }, [profesores, usuarios, userEmail]);
+
     const handleChangePassword = (e) => {
         e.preventDefault();
         setCambioContraseña({ ...cambioContraseña, [e.target.name]: e.target.value });
@@ -109,7 +110,7 @@ function Usuario() {
             telefono: datosUsuario.telefono,
             cuentaBancaria: datosUsuario.cuentaBancaria,
             cuentaIBAN: datosUsuario.cuentaIBAN,
-            cuenta: datosUsuario.cuenta,
+            cuentaBanco: datosUsuario.cuentaBanco,
             password2: ""
         };
         try {
@@ -163,6 +164,8 @@ function Usuario() {
             toast.error(error.message);
         }
     };
+
+
 
     return (
         <>
@@ -240,11 +243,11 @@ function Usuario() {
                                 <Form.Group className="mb-3" controlId="cuentaBancaria">
                                     <Form.Label>Banco</Form.Label>
                                     <Form.Select
+                                        as="select"
                                         value={datosUsuario.cuentaBancaria}
                                         onChange={handleRegistro}
                                         name="cuentaBancaria"
                                     >
-                                        <option value="">Selecciona un banco</option>
                                         <option value="BCR">Banco de Costa Rica</option>
                                         <option value="BN">Banco Nacional de Costa Rica</option>
                                         <option value="BP">Banco Popular</option>
@@ -252,7 +255,7 @@ function Usuario() {
                                     </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="cuentaIBAN">
-                                    <Form.Label>Número IBAN</Form.Label>
+                                    <Form.Label>Número de cuenta IBAN</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={datosUsuario.cuentaIBAN}
@@ -264,7 +267,7 @@ function Usuario() {
                                     <Form.Label>Número de cuenta</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        value={datosUsuario.cuenta}
+                                        value={datosUsuario.cuentaBanco}
                                         onChange={handleRegistro}
                                         name="cuenta"
                                     />

@@ -12,7 +12,7 @@ import { toast, ToastContainer } from "react-toastify";
 
 function Solicitar() {
     const { user } = useContext(AuthContext);
-    const [archivo, setArchivo] = useState("");
+    const [archivo, setArchivo] = useState();
     const [solicitudes, setSolicitudes] = useState([]);
     const [asistencias, setAsistencias] = useState([]);
     const [cursos, setCursos] = useState([]);
@@ -33,7 +33,7 @@ function Solicitar() {
             telefono: "",
             cuentaBancaria: "",
             cuentaIBAN: "",
-            cuenta: "",
+            cuentaBanco: "",
             password2: ""
         });
 
@@ -52,6 +52,7 @@ function Solicitar() {
         telefono: "",
         cuentaBancaria: "",
         cuentaIBAN: "",
+        cuentaBanco: "",
         profesorAsistir: "",
         cursoAsistir: "",
         notaCursoAsistir: "",
@@ -162,6 +163,7 @@ function Solicitar() {
             telefono: "",
             cuentaBancaria: "",
             cuentaIBAN: "",
+            cuentaBanco: "",
             profesorAsistir: "",
             cursoAsistir: "",
             notaCursoAsistir: "",
@@ -187,8 +189,6 @@ function Solicitar() {
 
             const downloadURL = await getDownloadURL(storageRef);
 
-            console.log("URL de descarga:", downloadURL);
-
             setArchivo(downloadURL);
         } catch (error) {
             console.error("Error al subir el archivo o obtener la URL de descarga:", error);
@@ -199,7 +199,6 @@ function Solicitar() {
     const agregarSolicitud = async (e) => {
         e.preventDefault();
         const hayPeriodosActivos = periodos.find((periodo) => periodo.estado);
-        console.log(hayPeriodosActivos.id)
         if (hayPeriodosActivos) {
             try {
                 if (tipoAsistencia === "Horas Estudiantes") {
@@ -241,7 +240,7 @@ function Solicitar() {
                     telefono: datosUsuario.telefono,
                     tipoCuenta: datosUsuario.cuentaBancaria,
                     cuentaIBAN: datosUsuario.cuentaIBAN,
-                    cuentaBancaria: datosUsuario.cuenta,
+                    cuentaBancaria: datosUsuario.cuentaBanco,
                     profesorAsistir,
                     cursoAsistir,
                     notaCursoAsistir,
@@ -256,6 +255,7 @@ function Solicitar() {
                 setArchivo("")
                 toast.success("Solicitud enviada exitosamente.");
                 cerrarModal()
+
             } catch (error) {
                 console.error("Error al obtener la URL de descarga:", error);
             }
@@ -330,11 +330,22 @@ function Solicitar() {
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="cuentaBancaria">
-                                    <Form.Label>Cuenta Bancaria</Form.Label>
+                                    <Form.Label>Banco</Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="N/A"
                                         value={datosUsuario.cuentaBancaria}
+                                        onChange={handleChange}
+                                        autoComplete='off'
+                                        required
+                                        disabled
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="telefono">
+                                    <Form.Label>Telefono</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={datosUsuario.telefono}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -369,7 +380,7 @@ function Solicitar() {
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="cuentaIBAN">
-                                    <Form.Label>Cuenta IBAN</Form.Label>
+                                    <Form.Label>Número de cuenta IBAN</Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="N/A"
@@ -380,6 +391,7 @@ function Solicitar() {
                                         disabled
                                     />
                                 </Form.Group>
+
                             </Col>
 
                             <Col>
@@ -406,24 +418,25 @@ function Solicitar() {
                                         disabled
                                     />
                                 </Form.Group>
-
-                                <Form.Group className="mb-3" controlId="telefono">
-                                    <Form.Label>Telefono</Form.Label>
+                                <Form.Group className="mb-3" controlId="cuentaBanco">
+                                    <Form.Label>Número de cuenta</Form.Label>
                                     <Form.Control
-                                        type="number"
-                                        value={datosUsuario.telefono}
+                                        type="text"
+                                        placeholder="N/A"
+                                        value={datosUsuario.cuentaBanco}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
                                         disabled
                                     />
                                 </Form.Group>
+
                             </Col>
                         </Row>
 
                         <Form.Group controlId="tipoAsistencia">
                             <Form.Label>Tipo de Asistencia</Form.Label>
-                            <Form.Control
+                            <Form.Select
                                 as="select"
                                 value={tipoAsistencia}
                                 onChange={handleChange}>
@@ -433,7 +446,7 @@ function Solicitar() {
                                         {asistencia.tipoAsistencia}
                                     </option>
                                 ))}
-                            </Form.Control>
+                            </Form.Select>
                         </Form.Group>
                         {tipoAsistencia === 'Horas Estudiantes' && (
                             <>
@@ -534,7 +547,7 @@ function Solicitar() {
                             <>
                                 <Form.Group controlId="profesorAsistir">
                                     <Form.Label>Profesor a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={profesorAsistir}
                                         onChange={handleChange}>
@@ -544,11 +557,11 @@ function Solicitar() {
                                                 {profesor.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group controlId="cursoAsistir">
                                     <Form.Label>Curso a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={cursoAsistir}
                                         onChange={handleChange}>
@@ -558,7 +571,7 @@ function Solicitar() {
                                                 {curso.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group controlId="semestresActivo">
                                     <Form.Label>Cantidad de Semestres Activo</Form.Label>
@@ -583,7 +596,7 @@ function Solicitar() {
                             <>
                                 <Form.Group controlId="cursoAsistir">
                                     <Form.Label>Curso a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={cursoAsistir}
                                         onChange={handleChange}>
@@ -593,7 +606,7 @@ function Solicitar() {
                                                 {curso.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="promedioPondSemAnt">
                                     <Form.Label>Promedio Ponderado Semestre Anterior</Form.Label>
@@ -628,7 +641,7 @@ function Solicitar() {
                             <>
                                 <Form.Group controlId="profesorAsistir">
                                     <Form.Label>Profesor a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={profesorAsistir}
                                         onChange={handleChange}>
@@ -638,11 +651,11 @@ function Solicitar() {
                                                 {profesor.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group controlId="cursoAsistir">
                                     <Form.Label>Curso a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={cursoAsistir}
                                         onChange={handleChange}>
@@ -652,7 +665,7 @@ function Solicitar() {
                                                 {curso.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="promedioPondSemAnt">
                                     <Form.Label>Promedio Ponderado Semestre Anterior</Form.Label>
