@@ -3,6 +3,8 @@ import { collection, query, where, getDocs, updateDoc, deleteDoc, orderBy } from
 import { Table, Modal, Form, Button, Pagination, Row, Col } from "react-bootstrap";
 import { AuthContext } from '../contexts/AuthContext';
 import { db } from "../config/firebase/firebase";
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 //librería de mensajes información
 import { toast, ToastContainer } from "react-toastify";
@@ -13,14 +15,20 @@ import { MdInfo, MdEdit, MdDelete } from "react-icons/md";
 const HistorialSolicitudes = () => {
     const { user } = useContext(AuthContext);
 
-    const [solicitudes, setSolicitudes] = useState([]);
+    const storage = getStorage();
 
+    const [archivo, setArchivo] = useState("");
+
+    const [horarioNuevo, setHorarioNuevo] = useState({});
+
+    const [solicitudes, setSolicitudes] = useState([]);
     const [asistencias, setAsistencias] = useState([]);
     const [cursos, setCursos] = useState([]);
     const [profesores, setProfesores] = useState([]);
 
     const [dataForm, setDataForm] = useState({
         id: "",
+        idPeriodo: "",
         tipoAsistencia: "",
         cedula: "",
         carne: "",
@@ -32,6 +40,7 @@ const HistorialSolicitudes = () => {
         semestresActivo: "",
         correo: "",
         telefono: "",
+        tipoCuenta: "",
         cuentaBancaria: "",
         cuentaIBAN: "",
         profesorAsistir: "",
@@ -76,7 +85,6 @@ const HistorialSolicitudes = () => {
         cursoAsistir,
         notaCursoAsistir,
         horario,
-        boleta,
     } = dataForm;
 
     const handleChange = (e) => {
@@ -85,6 +93,24 @@ const HistorialSolicitudes = () => {
             [e.target.id]: e.target.value
         })
     }
+
+    const handleFileChange = async (e) => {
+        try {
+            const file = e.target.files[0];
+            const storageRef = ref(storage, "boletasEstudiantes/" + file.name);
+
+            await uploadBytes(storageRef, file);
+
+            const downloadURL = await getDownloadURL(storageRef);
+
+            console.log("URL de descarga:", downloadURL);
+
+            setArchivo(downloadURL);
+        } catch (error) {
+            console.error("Error al subir el archivo o obtener la URL de descarga:", error);
+            throw error;
+        }
+    };
 
     useEffect(() => {
         const obtenerSolicitudes = async () => {
@@ -163,6 +189,7 @@ const HistorialSolicitudes = () => {
         const solicitud = solicitudes.find((solicitud) => solicitud.id === id);
         setDataForm({
             id: solicitud.id,
+            idPeriodo: solicitud.idPeriodo,
             tipoAsistencia: solicitud.tipoAsistencia,
             cedula: solicitud.cedula,
             carne: solicitud.carne,
@@ -175,6 +202,7 @@ const HistorialSolicitudes = () => {
             telefono: solicitud.telefono,
             cuentaBancaria: solicitud.cuentaBancaria,
             cuentaIBAN: solicitud.cuentaIBAN,
+            tipoCuenta: solicitud.tipoCuenta,
             profesorAsistir: solicitud.profesorAsistir,
             cursoAsistir: solicitud.cursoAsistir,
             notaCursoAsistir: solicitud.notaCursoAsistir,
@@ -193,24 +221,40 @@ const HistorialSolicitudes = () => {
 
     const editarSolicitud = async (e) => {
         e.preventDefault();
+        if (tipoAsistencia === "Horas Estudiantes") {
+            var horarioAux = {
+                lunes: [],
+                martes: [],
+                miercoles: [],
+                jueves: [],
+                viernes: [],
+                sabado: []
+            };
+            var filas = document.querySelectorAll("#horario tbody tr");
+            filas.forEach(function (fila) {
+                var celdas = fila.querySelectorAll("td");
+                var intervalo = celdas[0].textContent.trim();
+
+                for (var i = 1; i < celdas.length; i++) {
+                    var checkbox = celdas[i].querySelector("input[type='checkbox']");
+                    var dia = Object.keys(horarioAux)[i - 1];
+                    if (checkbox.checked) {
+                        horarioAux[dia].push(intervalo);
+                    }
+                }
+            });
+            setHorarioNuevo(horarioAux)
+        }
+
         const solicitudActualizada = {
             tipoAsistencia,
-            cedula,
-            carne,
-            apellido1,
-            apellido2,
-            nombre,
             promedioPondSemAnt,
             créditosAproSemAnt,
-            correo,
-            telefono,
-            cuentaBancaria,
-            cuentaIBAN,
             profesorAsistir,
             cursoAsistir,
             notaCursoAsistir,
-            horario,
-            boleta
+            horario: tipoAsistencia === "Horas Estudiantes" ? horarioNuevo : horario,
+            boleta: archivo
         };
         const q = query(collection(db, "solicitudes"), where("id", "==", id));
         const querySnapshot = await getDocs(q);
@@ -228,6 +272,8 @@ const HistorialSolicitudes = () => {
             solicitud.id === id ? { id: id, ...solicitudActualizada } : solicitud
         );
         setSolicitudes(listaSolicitudsActualizada);
+        setArchivo("")
+        setHorarioNuevo({})
     };
 
     const eliminarSolicitud = async (id) => {
@@ -912,7 +958,7 @@ const HistorialSolicitudes = () => {
                             <Form.Label>Boleta</Form.Label>
                             <Form.Control
                                 type="file"
-                                onChange={handleChange}
+                                onChange={handleFileChange}
                             />
                         </Form.Group>
                     </Form>
