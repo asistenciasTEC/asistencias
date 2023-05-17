@@ -199,3 +199,9 @@ input {
     align-items: flex-start;
     height: 100vh;
 }
+
+.containerToTitleAndSearch{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
