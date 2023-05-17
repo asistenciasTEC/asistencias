@@ -23,11 +23,26 @@ function Solicitar() {
     const [periodos, setPeriodos] = useState([]);
     const [usuarios, setUsuarios] = useState([]);
     const userEmail = user && user.email ? user.email : '';
-    const hayPeriodosActivos = periodos.some((periodo) => periodo.estado);
     const storage = getStorage();
+
+    const [datosUsuario, setDatosUsuario] = useState(
+        {
+            nombre: "",
+            correo: "",
+            apellido1: "",
+            apellido2: "",
+            cedula: "",
+            carne: "",
+            telefono: "",
+            cuentaBancaria: "",
+            cuentaIBAN: "",
+            cuenta: "",
+            password2: ""
+        });
 
     const [dataForm, setDataForm] = useState({
         id: "",
+        idPeriodo: "",
         tipoAsistencia: "",
         cedula: "",
         carne: "",
@@ -50,24 +65,10 @@ function Solicitar() {
         fecha: ""
     });
 
-    const [datosUsuario, setDatosUsuario] = useState(
-        {
-            nombre: "",
-            correo: "",
-            apellido1: "",
-            apellido2: "",
-            cedula: "",
-            carne: "",
-            telefono: "",
-            cuentaBancaria: "",
-            cuentaIBAN: "",
-            cuenta: "",
-            password2: ""
-        });
-
     const [showModal, setShowModal] = useState(false);
     const [modalTitle, setModalTitle] = useState("");
     const {
+        idPeriodo,
         tipoAsistencia,
         cedula,
         carne,
@@ -143,8 +144,6 @@ function Solicitar() {
         obtenerDatos();
     }, []);
 
-
-
     useEffect(() => {
         const usuarioEncontrado = usuarios.find(usuario => usuario.correo === userEmail);
         if (usuarioEncontrado && usuarioEncontrado !== datosUsuario) {
@@ -164,6 +163,7 @@ function Solicitar() {
         setModalTitle("Nueva solicitud");
         setDataForm({
             id: "",
+            idPeriodo: "",
             tipoAsistencia: "",
             cedula: "",
             carne: "",
@@ -193,49 +193,33 @@ function Solicitar() {
         setShowModal(false);
     };
 
-    // const handleFileChange = (event) => {
-    //     const file = event.target.files[0];
-    //     const storageRef = ref(storage, "boletasEstudiantes/" + file.name);
-
-    //     uploadBytes(storageRef, file)
-    //         .then(() => {
-    //             console.log("Archivo subido exitosamente");
-    //             // Obtén la URL de descarga del archivo recién subido
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error al subir el archivo", error);
-    //             // Maneja el error de manera apropiada
-    //         });
-    // };
-
     const handleFileChange = async (e) => {
         try {
             const file = e.target.files[0];
-            console.log(file)
             const storageRef = ref(storage, "boletasEstudiantes/" + file.name);
-            console.log(file)
+
             await uploadBytes(storageRef, file);
 
-            // Obtén la URL de descarga del archivo recién subido
             const downloadURL = await getDownloadURL(storageRef);
 
             console.log("URL de descarga:", downloadURL);
 
-            // Retorna la URL de descarga
             setArchivo(downloadURL);
         } catch (error) {
             console.error("Error al subir el archivo o obtener la URL de descarga:", error);
-            throw error; // Lanza el error para que pueda ser manejado en el componente que llama a handleFileChange
+            throw error;
         }
     };
 
-
     const agregarSolicitud = async (e) => {
         e.preventDefault();
-        if (hayPeriodosActivos === true) {
+        const hayPeriodosActivos = periodos.find((periodo) => periodo.estado);
+        console.log(hayPeriodosActivos.id)
+        if (hayPeriodosActivos) {
             try {
                 const nuevaSolicitud = {
                     id: uuid(),
+                    idPeriodo: hayPeriodosActivos.id,
                     tipoAsistencia,
                     cedula: datosUsuario.cedula,
                     carne: datosUsuario.carne,
@@ -261,11 +245,11 @@ function Solicitar() {
                 };
                 await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
                 setSolicitudes([nuevaSolicitud, ...solicitudes,]);
+                setArchivo("")
                 toast.success("Solicitud enviada exitosamente.");
                 cerrarModal()
             } catch (error) {
                 console.error("Error al obtener la URL de descarga:", error);
-                // Maneja el error de manera apropiada
             }
         } else {
             toast.error("No hay periodos activos.");
@@ -673,6 +657,7 @@ function Solicitar() {
                             <Form.Control
                                 type="file"
                                 onChange={handleFileChange}
+                                required
                             />
                         </Form.Group>
                     </Form>
