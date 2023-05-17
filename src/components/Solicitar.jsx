@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
-import { collection, query, addDoc, getDocs, serverTimestamp, orderBy } from "firebase/firestore";
+import { useState, useEffect, useContext } from "react";
+import { collection, query, addDoc, getDocs, serverTimestamp, orderBy, doc, updateDoc } from "firebase/firestore";
 import { Table, Modal, Form, Button, Row, Col } from "react-bootstrap";
 import { db } from "../config/firebase/firebase";
 import { v4 as uuid } from "uuid";
+import { AuthContext } from '../contexts/AuthContext';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 //librería de mensajes información
 import { toast, ToastContainer } from "react-toastify";
@@ -11,11 +14,17 @@ import { toast, ToastContainer } from "react-toastify";
 import { MdAddBox } from "react-icons/md";
 
 function Solicitar() {
+    const { user } = useContext(AuthContext);
+    const [archivo, setArchivo] = useState("");
     const [solicitudes, setSolicitudes] = useState([]);
     const [asistencias, setAsistencias] = useState([]);
     const [cursos, setCursos] = useState([]);
     const [profesores, setProfesores] = useState([]);
     const [periodos, setPeriodos] = useState([]);
+    const [usuarios, setUsuarios] = useState([]);
+    const userEmail = user && user.email ? user.email : '';
+    const hayPeriodosActivos = periodos.some((periodo) => periodo.estado);
+    const storage = getStorage();
 
     const [dataForm, setDataForm] = useState({
         id: "",
@@ -41,10 +50,23 @@ function Solicitar() {
         fecha: ""
     });
 
+    const [datosUsuario, setDatosUsuario] = useState(
+        {
+            nombre: "",
+            correo: "",
+            apellido1: "",
+            apellido2: "",
+            cedula: "",
+            carne: "",
+            telefono: "",
+            cuentaBancaria: "",
+            cuentaIBAN: "",
+            cuenta: "",
+            password2: ""
+        });
+
     const [showModal, setShowModal] = useState(false);
     const [modalTitle, setModalTitle] = useState("");
-
-
     const {
         tipoAsistencia,
         cedula,
@@ -69,46 +91,67 @@ function Solicitar() {
     } = dataForm;
 
     useEffect(() => {
-        const obtenerAsistencias = async () => {
-            const asistenciasCollection = collection(db, "asistencias");
-            const snapshot = await getDocs(asistenciasCollection);
-            const listaAsistencias = snapshot.docs.map((doc) => ({
-                ...doc.data(),
-            }));
-            setAsistencias(listaAsistencias);
-        };
-        obtenerAsistencias();
+        const obtenerDatos = async () => {
+            try {
+                const asistenciasCollection = collection(db, "asistencias");
+                const profesoresCollection = collection(db, "profesores");
+                const cursosCollection = collection(db, "cursos");
+                const periodosCollection = collection(db, "periodos");
+                const usuariosCollection = collection(db, "usuarios");
 
-        const obtenerProfesores = async () => {
-            const profesoresCollection = collection(db, "profesores");
-            const snapshot = await getDocs(profesoresCollection);
-            const listaProfesores = snapshot.docs.map((doc) => ({
-                ...doc.data(),
-            }));
-            setProfesores(listaProfesores);
-        };
-        obtenerProfesores();
+                const [asistenciasSnapshot, profesoresSnapshot, cursosSnapshot, periodosSnapshot, usuariosSnapshot] = await Promise.all([
+                    getDocs(asistenciasCollection),
+                    getDocs(profesoresCollection),
+                    getDocs(cursosCollection),
+                    getDocs(periodosCollection),
+                    getDocs(usuariosCollection)
+                ]);
 
-        const obtenerCursos = async () => {
-            const cursosCollection = collection(db, "cursos");
-            const snapshot = await getDocs(cursosCollection);
-            const listaCursos = snapshot.docs.map((doc) => ({
-                ...doc.data(),
-            }));
-            setCursos(listaCursos);
-        };
-        obtenerCursos();
+                const listaAsistencias = [];
+                asistenciasSnapshot.forEach((doc) => {
+                    listaAsistencias.push(doc.data());
+                });
+                setAsistencias(listaAsistencias);
 
-        const obtenerPeriodos = async () => {
-            const queryPeriodosCollection = query(collection(db, "periodos"), orderBy("fecha", "desc"));
-            const snapshot = await getDocs(queryPeriodosCollection);
-            const listaPeriodos = snapshot.docs.map((doc) => ({
-                ...doc.data(),
-            }));
-            setPeriodos(listaPeriodos);
+                const listaProfesores = [];
+                profesoresSnapshot.forEach((doc) => {
+                    listaProfesores.push(doc.data());
+                });
+                setProfesores(listaProfesores);
+
+                const listaCursos = [];
+                cursosSnapshot.forEach((doc) => {
+                    listaCursos.push(doc.data());
+                });
+                setCursos(listaCursos);
+
+                const listaPeriodos = [];
+                periodosSnapshot.forEach((doc) => {
+                    listaPeriodos.push(doc.data());
+                });
+                setPeriodos(listaPeriodos);
+
+                const listaUsuarios = [];
+                usuariosSnapshot.forEach((doc) => {
+                    listaUsuarios.push(doc.data());
+                });
+                setUsuarios(listaUsuarios);
+            } catch (error) {
+                console.error("Error al obtener los datos:", error);
+            }
         };
-        obtenerPeriodos();
+        obtenerDatos();
     }, []);
+
+
+
+    useEffect(() => {
+        const usuarioEncontrado = usuarios.find(usuario => usuario.correo === userEmail);
+        if (usuarioEncontrado && usuarioEncontrado !== datosUsuario) {
+            setDatosUsuario(usuarioEncontrado);
+        }
+    }, [usuarios, userEmail, datosUsuario]);
+
 
     const handleChange = (e) => {
         setDataForm({
@@ -150,38 +193,80 @@ function Solicitar() {
         setShowModal(false);
     };
 
+    // const handleFileChange = (event) => {
+    //     const file = event.target.files[0];
+    //     const storageRef = ref(storage, "boletasEstudiantes/" + file.name);
+
+    //     uploadBytes(storageRef, file)
+    //         .then(() => {
+    //             console.log("Archivo subido exitosamente");
+    //             // Obtén la URL de descarga del archivo recién subido
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error al subir el archivo", error);
+    //             // Maneja el error de manera apropiada
+    //         });
+    // };
+
+    const handleFileChange = async (e) => {
+        try {
+            const file = e.target.files[0];
+            console.log(file)
+            const storageRef = ref(storage, "boletasEstudiantes/" + file.name);
+            console.log(file)
+            await uploadBytes(storageRef, file);
+
+            // Obtén la URL de descarga del archivo recién subido
+            const downloadURL = await getDownloadURL(storageRef);
+
+            console.log("URL de descarga:", downloadURL);
+
+            // Retorna la URL de descarga
+            setArchivo(downloadURL);
+        } catch (error) {
+            console.error("Error al subir el archivo o obtener la URL de descarga:", error);
+            throw error; // Lanza el error para que pueda ser manejado en el componente que llama a handleFileChange
+        }
+    };
+
+
     const agregarSolicitud = async (e) => {
         e.preventDefault();
-        const hayPeriodosActivos = periodos.some((periodo) => periodo.estado);
         if (hayPeriodosActivos === true) {
-            const nuevaSolicitud = {
-                id: uuid(),
-                tipoAsistencia,
-                cedula,
-                carne,
-                apellido1,
-                apellido2,
-                nombre,
-                promedioPondSemAnt,
-                créditosAproSemAnt,
-                semestresActivo,
-                correo,
-                telefono,
-                cuentaBancaria,
-                cuentaIBAN,
-                profesorAsistir,
-                cursoAsistir,
-                notaCursoAsistir,
-                horario,
-                boleta,
-                condicion,
-                horasAsignadas,
-                fecha: serverTimestamp()
-            };
-            await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
-            setSolicitudes([nuevaSolicitud, ...solicitudes,]);
-            toast.success("Solicitud enviada exitosamente.");
-            cerrarModal()
+            try {
+                const nuevaSolicitud = {
+                    id: uuid(),
+                    tipoAsistencia,
+                    cedula: datosUsuario.cedula,
+                    carne: datosUsuario.carne,
+                    apellido1: datosUsuario.apellido1,
+                    apellido2: datosUsuario.apellido2,
+                    nombre: datosUsuario.nombre,
+                    promedioPondSemAnt,
+                    créditosAproSemAnt,
+                    semestresActivo,
+                    correo: datosUsuario.correo,
+                    telefono: datosUsuario.telefono,
+                    cuentaBancaria: datosUsuario.cuentaBancaria,
+                    cuentaIBAN: datosUsuario.cuentaIBAN,
+                    cuenta: datosUsuario.cuenta ?? '',
+                    profesorAsistir,
+                    cursoAsistir,
+                    notaCursoAsistir,
+                    horario,
+                    boleta: archivo,
+                    condicion: "Pendiente",
+                    horasAsignadas,
+                    fecha: serverTimestamp()
+                };
+                await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
+                setSolicitudes([nuevaSolicitud, ...solicitudes,]);
+                toast.success("Solicitud enviada exitosamente.");
+                cerrarModal()
+            } catch (error) {
+                console.error("Error al obtener la URL de descarga:", error);
+                // Maneja el error de manera apropiada
+            }
         } else {
             toast.error("No hay periodos activos.");
             cerrarModal()
@@ -215,19 +300,20 @@ function Solicitar() {
                                     <Form.Label>Primer Apellido</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        value={apellido1}
+                                        value={datosUsuario.apellido1}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
                                         disabled
                                     />
+
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="carne">
                                     <Form.Label>Carné</Form.Label>
                                     <Form.Control
                                         type="number"
-                                        value={carne}
+                                        value={datosUsuario.carne}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -240,7 +326,7 @@ function Solicitar() {
                                     <Form.Control
                                         type="text"
                                         placeholder="N/A"
-                                        value={cuentaBancaria}
+                                        value={datosUsuario.cuentaBancaria}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -254,7 +340,7 @@ function Solicitar() {
                                     <Form.Label>Segundo Apellido</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        value={apellido2}
+                                        value={datosUsuario.apellido2}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -266,7 +352,7 @@ function Solicitar() {
                                     <Form.Label>Cedula</Form.Label>
                                     <Form.Control
                                         type="number"
-                                        value={cedula}
+                                        value={datosUsuario.cedula}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -279,7 +365,7 @@ function Solicitar() {
                                     <Form.Control
                                         type="text"
                                         placeholder="N/A"
-                                        value={cuentaIBAN}
+                                        value={datosUsuario.cuentaIBAN}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -293,7 +379,7 @@ function Solicitar() {
                                     <Form.Label>Nombre</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        value={nombre}
+                                        value={datosUsuario.nombre}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -305,7 +391,7 @@ function Solicitar() {
                                     <Form.Label>Correo</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        value={correo}
+                                        value={datosUsuario.correo}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -317,7 +403,7 @@ function Solicitar() {
                                     <Form.Label>Telefono</Form.Label>
                                     <Form.Control
                                         type="number"
-                                        value={telefono}
+                                        value={datosUsuario.telefono}
                                         onChange={handleChange}
                                         autoComplete='off'
                                         required
@@ -586,7 +672,7 @@ function Solicitar() {
                             <Form.Label>Boleta</Form.Label>
                             <Form.Control
                                 type="file"
-                                onChange={handleChange}
+                                onChange={handleFileChange}
                             />
                         </Form.Group>
                     </Form>
