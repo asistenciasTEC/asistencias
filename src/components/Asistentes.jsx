@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../config/firebase/firebase";
-import { Table, Form, Pagination} from "react-bootstrap";
+import { Table, Form, Pagination } from "react-bootstrap";
 import { getAuth } from "firebase/auth";
 
 function Asistentes() {
@@ -102,7 +102,7 @@ function Asistentes() {
     };
 
     cargarProfesores();
-  });
+  }, [usuarioAuthentication]);
 
   useEffect(() => {
     if (profesoresCargados) {
@@ -116,7 +116,6 @@ function Asistentes() {
           where("profesorAsistir", "==", profesorEncontrado.nombre),
           where("condicion", "==", "Aceptado")
         );
-        console.log(profesorEncontrado.nombre);
         const snapshot = await getDocs(querySolicitudesCollection);
         const listaAsistentes = snapshot.docs.map((doc) => ({
           ...doc.data(),
@@ -124,9 +123,8 @@ function Asistentes() {
         setAsistentes(listaAsistentes);
       };
       obtenerSolicitudes();
-      console.log(asistentes);
     }
-  });
+  }, [profesores,usuarioAuthentication.email,profesoresCargados]);
 
   return (
     <>
