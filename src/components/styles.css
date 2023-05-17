@@ -17,6 +17,11 @@ body {
     color: white;
 }
 
+.text_terminos {
+    margin: 10px;
+    text-align: justify;
+}
+
 .Scroll a {
     color: rgb(224, 209, 209);
     text-decoration: none;
