@@ -9,6 +9,7 @@ import AuthProvider from "./contexts/AuthContext";
 import NotFound from "./components/NotFound";
 import Solicitar from './components/Solicitar';
 import HistorialSolicitudes from './components/HistorialSolicitudes';
+import Asistentes from './components/Asistentes';
 
 function App() {
   return (
@@ -26,6 +27,9 @@ function App() {
             </Route>
             <Route exact path="/historialSolicitudes" element={<PrivateRoute />}>
               <Route path="/historialSolicitudes" element={<HistorialSolicitudes />} />
+            </Route>
+            <Route exact path="/asistentes" element={<PrivateRoute />}>
+              <Route path="/asistentes" element={<Asistentes />} />
             </Route>
             <Route exact path="/usuario" element={<PrivateRoute />}>
               <Route path="/usuario" element={<Usuario />} />

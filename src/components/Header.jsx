@@ -3,7 +3,6 @@ import { auth } from '../config/firebase/firebase';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-
 import { MdLogout, MdManageAccounts } from "react-icons/md";
 import './styles.css';
 import { db } from "../config/firebase/firebase";
@@ -68,6 +67,7 @@ function Header() {
                             <Link to="/">Inicio</Link>
                             {bandera && <Link to="/solicitar">Solicitar</Link>}
                             {bandera && <Link to="/historialSolicitudes">Historial de solicitudes</Link>}
+                            {!bandera && <Link to="/asistentes">Asistentes</Link>}
                             <MdManageAccounts type="button" className="btnLogin" onClick={handleRoute} />
                             <MdLogout type="button" className='btnLogout' onClick={handleSignout} />
                         </>
