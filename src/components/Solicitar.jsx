@@ -436,7 +436,7 @@ function Solicitar() {
 
                         <Form.Group controlId="tipoAsistencia">
                             <Form.Label>Tipo de Asistencia</Form.Label>
-                            <Form.Control
+                            <Form.Select
                                 as="select"
                                 value={tipoAsistencia}
                                 onChange={handleChange}>
@@ -446,7 +446,7 @@ function Solicitar() {
                                         {asistencia.tipoAsistencia}
                                     </option>
                                 ))}
-                            </Form.Control>
+                            </Form.Select>
                         </Form.Group>
                         {tipoAsistencia === 'Horas Estudiantes' && (
                             <>
@@ -547,7 +547,7 @@ function Solicitar() {
                             <>
                                 <Form.Group controlId="profesorAsistir">
                                     <Form.Label>Profesor a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={profesorAsistir}
                                         onChange={handleChange}>
@@ -557,11 +557,11 @@ function Solicitar() {
                                                 {profesor.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group controlId="cursoAsistir">
                                     <Form.Label>Curso a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={cursoAsistir}
                                         onChange={handleChange}>
@@ -571,7 +571,7 @@ function Solicitar() {
                                                 {curso.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group controlId="semestresActivo">
                                     <Form.Label>Cantidad de Semestres Activo</Form.Label>
@@ -596,7 +596,7 @@ function Solicitar() {
                             <>
                                 <Form.Group controlId="cursoAsistir">
                                     <Form.Label>Curso a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={cursoAsistir}
                                         onChange={handleChange}>
@@ -606,7 +606,7 @@ function Solicitar() {
                                                 {curso.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="promedioPondSemAnt">
                                     <Form.Label>Promedio Ponderado Semestre Anterior</Form.Label>
@@ -641,7 +641,7 @@ function Solicitar() {
                             <>
                                 <Form.Group controlId="profesorAsistir">
                                     <Form.Label>Profesor a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={profesorAsistir}
                                         onChange={handleChange}>
@@ -651,11 +651,11 @@ function Solicitar() {
                                                 {profesor.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group controlId="cursoAsistir">
                                     <Form.Label>Curso a Asistir</Form.Label>
-                                    <Form.Control
+                                    <Form.Select
                                         as="select"
                                         value={cursoAsistir}
                                         onChange={handleChange}>
@@ -665,7 +665,7 @@ function Solicitar() {
                                                 {curso.nombre}
                                             </option>
                                         ))}
-                                    </Form.Control>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="promedioPondSemAnt">
                                     <Form.Label>Promedio Ponderado Semestre Anterior</Form.Label>
