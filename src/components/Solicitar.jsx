@@ -202,6 +202,29 @@ function Solicitar() {
         console.log(hayPeriodosActivos.id)
         if (hayPeriodosActivos) {
             try {
+                if (tipoAsistencia === "Horas Estudiantes") {
+                    var horarioAux = {
+                        lunes: [],
+                        martes: [],
+                        miercoles: [],
+                        jueves: [],
+                        viernes: [],
+                        sabado: []
+                    };
+                    var filas = document.querySelectorAll("#horario tbody tr");
+                    filas.forEach(function (fila) {
+                        var celdas = fila.querySelectorAll("td");
+                        var intervalo = celdas[0].textContent.trim();
+
+                        for (var i = 1; i < celdas.length; i++) {
+                            var checkbox = celdas[i].querySelector("input[type='checkbox']");
+                            var dia = Object.keys(horarioAux)[i - 1];
+                            if (checkbox.checked) {
+                                horarioAux[dia].push(intervalo);
+                            }
+                        }
+                    });
+                }
                 const nuevaSolicitud = {
                     id: uuid(),
                     idPeriodo: hayPeriodosActivos.id,
@@ -222,7 +245,7 @@ function Solicitar() {
                     profesorAsistir,
                     cursoAsistir,
                     notaCursoAsistir,
-                    horario,
+                    horario: tipoAsistencia === "Horas Estudiantes" ? horarioAux : horario,
                     boleta: archivo,
                     condicion: "Pendiente",
                     horasAsignadas,
