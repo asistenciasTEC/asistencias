@@ -124,7 +124,7 @@ function Asistentes() {
       };
       obtenerSolicitudes();
     }
-  }, [profesores,usuarioAuthentication.email,profesoresCargados]);
+  }, [profesores, usuarioAuthentication.email, profesoresCargados]);
 
   return (
     <>
