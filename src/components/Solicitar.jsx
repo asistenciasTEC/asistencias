@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { collection, query, addDoc, getDocs, serverTimestamp, orderBy, doc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
 import { Table, Modal, Form, Button, Row, Col } from "react-bootstrap";
 import { db } from "../config/firebase/firebase";
 import { v4 as uuid } from "uuid";
@@ -9,9 +9,6 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 //librería de mensajes información
 import { toast, ToastContainer } from "react-toastify";
-
-//librería de iconos boostrap para react
-import { MdAddBox } from "react-icons/md";
 
 function Solicitar() {
     const { user } = useContext(AuthContext);
@@ -68,26 +65,14 @@ function Solicitar() {
     const [showModal, setShowModal] = useState(false);
     const [modalTitle, setModalTitle] = useState("");
     const {
-        idPeriodo,
         tipoAsistencia,
-        cedula,
-        carne,
-        apellido1,
-        apellido2,
-        nombre,
         promedioPondSemAnt,
         créditosAproSemAnt,
         semestresActivo,
-        correo,
-        telefono,
-        cuentaBancaria,
-        cuentaIBAN,
         profesorAsistir,
         cursoAsistir,
         notaCursoAsistir,
         horario,
-        boleta,
-        condicion,
         horasAsignadas
     } = dataForm;
 
@@ -257,17 +242,33 @@ function Solicitar() {
         }
     };
 
+    const handleDescargarBoleta = () => {
+        window.open(
+            'https://drive.google.com/file/d/1yEmKJ2ldpehNzTTYZZ__CAxrjrCk8vN8/view',
+            '_blank'
+        );
+    };
+
     return (
-        <div className="container-lg ">
+        <div className="container-lg">
             <h1>Solicitar</h1>
-            <div className="row d-flex justify-content-center">
-                <div className="col">
+            <div className="row justify-content-center">
+                <div className="col text-center">
                     <Button
                         className="px-2 py-1 mb-2 fs-5"
                         variant="primary"
                         onClick={() => abrirModal("agregar")}
                     >
-                        <MdAddBox />
+                        Nueva Solicitud
+                    </Button>
+                </div>
+                <div className="col text-center">
+                    <Button
+                        className="px-2 py-1 mb-2 fs-5"
+                        variant="success"
+                        onClick={handleDescargarBoleta}
+                    >
+                        Descargar Boleta
                     </Button>
                 </div>
             </div>
