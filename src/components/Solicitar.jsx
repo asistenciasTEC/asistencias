@@ -64,6 +64,7 @@ function Solicitar() {
     });
 
     const [showModal, setShowModal] = useState(false);
+
     const [modalTitle, setModalTitle] = useState("");
     const {
         tipoAsistencia,
@@ -73,7 +74,6 @@ function Solicitar() {
         profesorAsistir,
         cursoAsistir,
         notaCursoAsistir,
-        horario,
         horasAsignadas
     } = dataForm;
 
@@ -246,7 +246,7 @@ function Solicitar() {
                     profesorAsistir,
                     cursoAsistir,
                     notaCursoAsistir,
-                    horario: tipoAsistencia === "Horas Estudiantes" ? horarioAux : horario,
+                    horario: horarioAux,
                     boleta: archivo,
                     condicion: "Pendiente",
                     horasAsignadas,
@@ -255,7 +255,7 @@ function Solicitar() {
                 await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
                 setSolicitudes([nuevaSolicitud, ...solicitudes,]);
                 setArchivo("")
-                setHorarioAux(horario)
+                //setHorarioAux(horario)
                 toast.success("Solicitud enviada exitosamente.");
                 cerrarModal()
 
