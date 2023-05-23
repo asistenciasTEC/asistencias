@@ -10,9 +10,10 @@ function Asistentes() {
   const [asistentes, setAsistentes] = useState([]);
   const [profesores, setProfesor] = useState();
   const [profesoresCargados, setProfesoresCargados] = useState(false);
-
+  const [asistentesBandera, setAsistentesBandera] = useState(false);
   const [valorSeleccionado, setValorSeleccionado] = useState("");
   const [resultados, setResultados] = useState([]);
+  //Paginación
   //Paginación
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -88,21 +89,23 @@ function Asistentes() {
   };
 
   useEffect(() => {
-    const cargarProfesores = async () => {
-      const q = query(
-        collection(db, "profesores"),
-        where("email", "==", usuarioAuthentication.email)
-      );
-      const st = await getDocs(q);
-      const profe = st.docs.map((prof) => ({
-        ...prof.data(),
-      }));
-      setProfesor(profe);
-      setProfesoresCargados(true);
-    };
-
-    cargarProfesores();
-  }, [usuarioAuthentication]);
+    if (!asistentesBandera) {
+      const cargarProfesores = async () => {
+        const q = query(
+          collection(db, "profesores"),
+          where("email", "==", usuarioAuthentication.email)
+        );
+        const st = await getDocs(q);
+        const profe = st.docs.map((prof) => ({
+          ...prof.data(),
+        }));
+        setProfesor(profe);
+        setProfesoresCargados(true);
+      };
+      cargarProfesores();
+      console.log("Prueba")
+    }
+  });
 
   useEffect(() => {
     if (profesoresCargados) {
@@ -121,10 +124,12 @@ function Asistentes() {
           ...doc.data(),
         }));
         setAsistentes(listaAsistentes);
+        setProfesoresCargados(false);
+        setAsistentesBandera(true);
       };
       obtenerSolicitudes();
     }
-  }, [profesores, usuarioAuthentication.email, profesoresCargados]);
+  });
 
   return (
     <>
@@ -164,6 +169,7 @@ function Asistentes() {
             <tr>
               <th>Carné</th>
               <th>Nombre completo</th>
+              <th>Teléfono</th>
               <th>Correo Electrónico</th>
               <th>Tipo de Asistencia</th>
               <th>Curso</th>
@@ -175,6 +181,7 @@ function Asistentes() {
               <tr key={asistentes.id}>
                 <td>{asistentes.carne}</td>
                 <td>{asistentes.nombre}</td>
+                <td>{asistentes.telefono}</td>
                 <td>{asistentes.correo}</td>
                 <td>{asistentes.tipoAsistencia}</td>
                 <td>{asistentes.cursoAsistir}</td>
