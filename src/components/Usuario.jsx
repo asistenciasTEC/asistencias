@@ -6,16 +6,17 @@ import { toast, ToastContainer } from "react-toastify";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
 import { getAuth, updatePassword, signOut } from "firebase/auth";
+
 function Usuario() {
     const { user } = useContext(AuthContext);
     const auth = getAuth();
-    const usuarioAuthentication = auth.currentUser
+    const usuarioAuthentication = auth.currentUser;
     const history = useNavigate();
     const userEmail = user && user.email ? user.email : '';
     const [datosCargados, setDatosCargados] = useState(false);
     const [bandera, setBandera] = useState(false);
-    const [usuarios, setUsuarios] = useState([].sort());
-    const [profesores, setProfesores] = useState([].sort());
+    const [usuarios, setUsuarios] = useState([]);
+    const [profesores, setProfesores] = useState([]);
     const [cambioContraseña, setCambioContraseña] = useState({
         nuevaContraseña: "",
         confirmacionContraseña: ""
@@ -25,20 +26,20 @@ function Usuario() {
         email: "",
         password: ""
     });
-    const [datosUsuario, setDatosUsuario] = useState(
-        {
-            nombre: "",
-            correo: "",
-            apellido1: "",
-            apellido2: "",
-            cedula: "",
-            carne: "",
-            telefono: "",
-            cuentaBancaria: "",
-            cuentaIBAN: "",
-            cuentaBanco: "",
-            password2: ""
-        });
+    const [datosUsuario, setDatosUsuario] = useState({
+        nombre: "",
+        correo: "",
+        apellido1: "",
+        apellido2: "",
+        cedula: "",
+        carne: "",
+        telefono: "",
+        cuentaBancaria: "",
+        cuentaIBAN: "",
+        cuentaBanco: "",
+        password2: ""
+    });
+
     useEffect(() => {
         const obtenerUsuarios = async () => {
             const queryUsuariosCollection = query(collection(db, "usuarios"), where("correo", "==", user.email));
@@ -48,6 +49,7 @@ function Usuario() {
             }));
             setUsuarios(listaUsuarios);
         };
+
         const obtenerProfesores = async () => {
             const queryProfesoresCollection = query(collection(db, "profesores"), where("email", "==", user.email));
             const snapshot = await getDocs(queryProfesoresCollection);
@@ -56,13 +58,15 @@ function Usuario() {
             }));
             setProfesores(listaProfesores);
         };
+
         obtenerProfesores();
         obtenerUsuarios();
-    },);
+    }, [user.email]);
 
     useEffect(() => {
-        const usuarioEncontrado = usuarios.find(usuario => usuario.correo === userEmail);
-        const profesorEncontrado = profesores.find(profesor => profesor.email === userEmail);
+        const usuarioEncontrado = usuarios.find((usuario) => usuario.correo === userEmail);
+        const profesorEncontrado = profesores.find((profesor) => profesor.email === userEmail);
+
         if (usuarioEncontrado) {
             setDatosUsuario(usuarioEncontrado);
             setBandera(false);
@@ -70,6 +74,7 @@ function Usuario() {
             setDatosProfesor(profesorEncontrado);
             setBandera(true);
         }
+
         setTimeout(() => {
             setDatosCargados(true);
         }, 2000);
@@ -79,278 +84,339 @@ function Usuario() {
         e.preventDefault();
         setCambioContraseña({ ...cambioContraseña, [e.target.name]: e.target.value });
     };
+
     const handleRegistro = (e) => {
         e.preventDefault();
         setDatosUsuario({ ...datosUsuario, [e.target.name]: e.target.value });
     };
 
-    async function actualizar(coleccion, usuario, actualizado, mensaje) {
-        const q = query(collection(db, coleccion), where("id", "==", usuario.id));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            updateDoc(doc.ref, actualizado)
-                .then(() => {
-                    toast.success(mensaje);
-                })
-                .catch((error) => {
-                    toast.error("Ha ocurrido un error");
-                });
-        });
-    }
-
-    const handleSubmitRegistro = async (e) => {
-        e.preventDefault();
-        const usuarioActualizado =
-        {
-            nombre: datosUsuario.nombre,
-            apellido1: datosUsuario.apellido1,
-            apellido2: datosUsuario.apellido2,
-            cedula: datosUsuario.cedula,
-            carne: datosUsuario.carne,
-            telefono: datosUsuario.telefono,
-            cuentaBancaria: datosUsuario.cuentaBancaria,
-            cuentaIBAN: datosUsuario.cuentaIBAN,
-            cuentaBanco: datosUsuario.cuentaBanco,
-            password2: ""
-        };
-        try {
-            if ((cambioContraseña.nuevaContraseña === cambioContraseña.confirmacionContraseña) && (cambioContraseña.nuevaContraseña !== "" && cambioContraseña.confirmacionContraseña !== "") && (cambioContraseña.nuevaContraseña !== datosUsuario.password2)) {
-                usuarioActualizado.password2 = cambioContraseña.confirmacionContraseña;
-                actualizar("usuarios", datosUsuario, usuarioActualizado);
-                updatePassword(usuarioAuthentication, cambioContraseña.confirmacionContraseña).then(() => {
-                    signOut(auth);
-                    history("/login");
-                })
-            } else if (cambioContraseña.nuevaContraseña === "" && cambioContraseña.confirmacionContraseña === "") {
-                usuarioActualizado.password2 = datosUsuario.password2;
-                actualizar("usuarios", datosUsuario, usuarioActualizado, "El usuario se actualizó correctamente");
-
-            } else {
-                throw new Error("Las contraseñas no son iguales o son iguales a la contraseña actual");
-            }
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
-    const handleProfesor = (e) => {
+    const handleRegistroProfesor = (e) => {
         e.preventDefault();
         setDatosProfesor({ ...datosProfesor, [e.target.name]: e.target.value });
     };
 
-
-    const handleSubmitProfesor = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const profesorActualizado =
-        {
-            nombre: datosProfesor.nombre,
-            password: ""
-        };
         try {
-            if ((cambioContraseña.nuevaContraseña === cambioContraseña.confirmacionContraseña) && (cambioContraseña.nuevaContraseña !== "" && cambioContraseña.confirmacionContraseña !== "") && (cambioContraseña.nuevaContraseña !== datosProfesor.password)) {
-                profesorActualizado.password = cambioContraseña.confirmacionContraseña;
-                actualizar("profesores", datosProfesor, profesorActualizado);
-                updatePassword(usuarioAuthentication, cambioContraseña.confirmacionContraseña).then(() => {
-                    signOut(auth);
-                    history("/login");
-                })
-            } else if (cambioContraseña.nuevaContraseña === "" && cambioContraseña.confirmacionContraseña === "") {
-                profesorActualizado.password = datosProfesor.password;
-                actualizar("profesores", datosProfesor, profesorActualizado, "El profesor se actualizó correctamente");
-
+            if (bandera) {
+                const profesorActualizado = { nombre: datosProfesor.nombre, email: datosProfesor.email, password: datosProfesor.password };
+                const q = query(collection(db, "profesores"), where("email", "==", user.email));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    updateDoc(doc.ref, profesorActualizado)
+                        .then(() => {
+                            toast.success("Profesor editado exitosamente.");
+                        })
+                        .catch((error) => {
+                            toast.error("Ha ocurrido un error.");
+                        });
+                });
             } else {
-                throw new Error("Las contraseñas no son iguales o son iguales a la contraseña actual");
+                const usuarioActualizado = {
+                    nombre: datosUsuario.nombre,
+                    correo: datosUsuario.correo,
+                    apellido1: datosUsuario.apellido1,
+                    apellido2: datosUsuario.apellido2,
+                    cedula: datosUsuario.cedula,
+                    carne: datosUsuario.carne,
+                    telefono: datosUsuario.telefono,
+                    cuentaBancaria: datosUsuario.cuentaBancaria,
+                    cuentaIBAN: datosUsuario.cuentaIBAN,
+                    cuentaBanco: datosUsuario.cuentaBanco,
+                    password2: datosUsuario.password2
+                }
+                const q = query(collection(db, "usuarios"), where("correo", "==", user.email));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    updateDoc(doc.ref, usuarioActualizado)
+                        .then(() => {
+                            toast.success("Usuario editado exitosamente.");
+                        })
+                        .catch((error) => {
+                            toast.error("Ha ocurrido un error.");
+                        });
+                });
             }
         } catch (error) {
-            toast.error(error.message);
+            toast.error("Error al actualizar los datos.");
+        }
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (cambioContraseña.nuevaContraseña !== cambioContraseña.confirmacionContraseña) {
+                toast.error("Las contraseñas no coinciden.");
+                return;
+            }
+            try {
+                await updatePassword(usuarioAuthentication, cambioContraseña.confirmacionContraseña);
+                signOut(auth);
+                history("/login");
+            } catch (error) {
+                if (error.code === "auth/requires-recent-login") {
+                    toast.error("Error al actualizar la contraseña. Por favor, vuelva a iniciar sesión e inténtelo de nuevo");
+                } else {
+                    throw error;
+                }
+            }
+        } catch (error) {
+            toast.error("Error al actualizar la contraseña. Por favor, vuelva a intentarlo más tarde.");
         }
     };
 
 
-
     return (
-        <>
-            {datosCargados && (
+        <div style={{ marginLeft: '20px', marginRight: '20px' }}>
+            {datosCargados ? (
                 <>
-                    {!bandera && <Form id="formRegistro" onSubmit={handleSubmitRegistro}>
-                        <h2>Usuario Estudiante</h2>
-                        <Row>
-                            <Col>
-                                <Form.Group className="mb-3" controlId="correo">
-                                    <Form.Label>Correo</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        value={datosUsuario.correo}
-                                        name="correo"
-                                        disabled={!false}
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="nombre">
-                                    <Form.Label>Nombre</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosUsuario.nombre}
-                                        onChange={handleRegistro}
-                                        name="nombre"
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="apellido1">
-                                    <Form.Label>Primer Apellido</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosUsuario.apellido1}
-                                        onChange={handleRegistro}
-                                        name="apellido1"
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="apellido2">
-                                    <Form.Label>Segundo Apellido</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosUsuario.apellido2}
-                                        onChange={handleRegistro}
-                                        name="apellido2"
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="cedula">
-                                    <Form.Label>Cédula</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosUsuario.cedula}
-                                        onChange={handleRegistro}
-                                        name="cedula"
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="carne">
-                                    <Form.Label>Carné</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosUsuario.carne}
-                                        onChange={handleRegistro}
-                                        name="carne"
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group className="mb-3" controlId="telefono">
-                                    <Form.Label>Teléfono</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosUsuario.telefono}
-                                        onChange={handleRegistro}
-                                        name="telefono"
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="cuentaBancaria">
-                                    <Form.Label>Banco</Form.Label>
-                                    <Form.Select
-                                        as="select"
-                                        value={datosUsuario.cuentaBancaria}
-                                        onChange={handleRegistro}
-                                        name="cuentaBancaria"
-                                    >
-                                        <option value="BCR">Banco de Costa Rica</option>
-                                        <option value="BN">Banco Nacional de Costa Rica</option>
-                                        <option value="BP">Banco Popular</option>
+                    <h2>Perfil de Usuario</h2>
+                    <Form onSubmit={handleSubmit}>
+                        {!bandera ? (
+                            <>
 
-                                    </Form.Select>
+                                <Form.Group as={Row} controlId="correo" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Correo electrónico:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="correo"
+                                            value={datosUsuario.correo}
+                                            disabled={true}
+                                        />
+                                    </Col>
                                 </Form.Group>
-                                <Form.Group className="mb-3" controlId="cuentaIBAN">
-                                    <Form.Label>Número de cuenta IBAN</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosUsuario.cuentaIBAN}
-                                        onChange={handleRegistro}
-                                        name="cuentaIBAN"
-                                    />
+
+                                <Form.Group as={Row} controlId="nombre" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Nombre:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="nombre"
+                                            value={datosUsuario.nombre}
+                                            onChange={handleRegistro}
+                                            placeholder="Ingresa tu nombre"
+                                            required
+                                        />
+                                    </Col>
                                 </Form.Group>
-                                <Form.Group className="mb-3" controlId="cuenta">
-                                    <Form.Label>Número de cuenta</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosUsuario.cuentaBanco}
-                                        onChange={handleRegistro}
-                                        name="cuenta"
-                                    />
+
+                                <Form.Group as={Row} controlId="apellido1" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Primer apellido:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="apellido1"
+                                            value={datosUsuario.apellido1}
+                                            onChange={handleRegistro}
+                                            placeholder="Ingresa tu primer apellido"
+                                            required
+                                        />
+                                    </Col>
                                 </Form.Group>
-                                <Form.Group className="mb-3" controlId="cambioContraseña">
-                                    <Form.Label>Nueva contraseña</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={cambioContraseña.nuevaContraseña}
-                                        onChange={handleChangePassword}
-                                        name="nuevaContraseña"
-                                    />
+
+                                <Form.Group as={Row} controlId="apellido2" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Segundo apellido:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="apellido2"
+                                            value={datosUsuario.apellido2}
+                                            onChange={handleRegistro}
+                                            placeholder="Ingresa tu segundo apellido"
+                                            required
+                                        />
+                                    </Col>
                                 </Form.Group>
-                                <Form.Group className="mb-3" controlId="confirmacionContraseña">
-                                    <Form.Label>Confirmar contraseña</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={cambioContraseña.confirmacionContraseña}
-                                        onChange={handleChangePassword}
-                                        name="confirmacionContraseña"
-                                    />
+
+                                <Form.Group as={Row} controlId="carne" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Carné:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="carne"
+                                            value={datosUsuario.carne}
+                                            onChange={handleRegistro}
+                                            placeholder="Ingresa tu carné"
+                                            required
+                                        />
+                                    </Col>
                                 </Form.Group>
+
+                                <Form.Group as={Row} controlId="cedula" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Cedula:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="cedula"
+                                            value={datosUsuario.cedula}
+                                            onChange={handleRegistro}
+                                            placeholder="Ingresa tu cedula"
+                                            required
+                                        />
+                                    </Col>
+                                </Form.Group>
+
+                                <Form.Group as={Row} controlId="cuentaBancaria" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Tipo de banco:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Select
+                                            name="cuentaBancaria"
+                                            value={datosUsuario.cuentaBancaria}
+                                            onChange={handleRegistro}
+                                            required
+                                        >
+                                            <option value="Banco de Costa Rica">Banco de Costa Rica</option>
+                                            <option value="Banco Nacional">Banco Nacional</option>
+                                            <option value="Banco Popular">Banco Popular</option>
+                                        </Form.Select>
+                                    </Col>
+                                </Form.Group>
+
+                                <Form.Group as={Row} controlId="cuentaBanco" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Número de cuenta:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="cuentaBanco"
+                                            value={datosUsuario.cuentaBanco}
+                                            onChange={handleRegistro}
+                                            placeholder="Ingresa tu numero de cuenta"
+                                            required
+                                        />
+                                    </Col>
+                                </Form.Group>
+
+                                <Form.Group as={Row} controlId="cuentaIBAN" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Número de cuenta IBAN:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="cuentaIBAN"
+                                            value={datosUsuario.cuentaIBAN}
+                                            onChange={handleRegistro}
+                                            placeholder="Ingresa tu numero de cuenta IBAN"
+                                            required
+                                        />
+                                    </Col>
+                                </Form.Group>
+
+                                <Form.Group as={Row} controlId="telefono" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Teléfono:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="telefono"
+                                            value={datosUsuario.telefono}
+                                            onChange={handleRegistro}
+                                            placeholder="Ingresa tu numero de teléfono"
+                                            required
+                                        />
+                                    </Col>
+                                </Form.Group>
+
+
+                                <Button type="submit" className="mb-3">Guardar cambios</Button>
+                            </>
+                        ) : (
+                            <>
+                                <Form.Group as={Row} controlId="correo" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Correo electrónico:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="email"
+                                            value={datosProfesor.email}
+                                            name="correo"
+                                            disabled={!false}
+                                        />
+                                    </Col>
+
+                                </Form.Group>
+
+                                <Form.Group as={Row} controlId="nombre" className="mb-3">
+                                    <Form.Label column sm="3">
+                                        Nombre:
+                                    </Form.Label>
+                                    <Col sm="9">
+                                        <Form.Control
+                                            type="text"
+                                            name="nombre"
+                                            value={datosProfesor.nombre}
+                                            onChange={handleRegistroProfesor}
+                                            placeholder="Ingresa tu nombre"
+                                            required
+                                        />
+                                    </Col>
+                                </Form.Group>
+
+                                <Button type="submit" className="mb-3">Guardar cambios</Button>
+                            </>
+                        )}
+                    </Form>
+
+                    <h2>Cambio de Contraseña</h2>
+                    <Form onSubmit={handlePasswordSubmit}>
+                        <Form.Group as={Row} controlId="nuevaContraseña" className="mb-3">
+                            <Form.Label column sm="3">
+                                Nueva Contraseña:
+                            </Form.Label>
+                            <Col sm="9">
+                                <Form.Control
+                                    type="password"
+                                    name="nuevaContraseña"
+                                    value={cambioContraseña.nuevaContraseña}
+                                    onChange={handleChangePassword}
+                                    placeholder="Ingresa tu nueva contraseña"
+                                    required
+                                />
                             </Col>
-                        </Row>
-                        <div className="btn_container2">
-                            <Button variant="primary" type="Submit">
-                                Modificar
-                            </Button>
-                        </div>
-                    </Form>}
-                    {bandera && <Form id="formRegistro" onSubmit={handleSubmitProfesor} className="formContainer">
-                        <Row>
-                            <Col>
-                                <h2>Usuario Profesor</h2>
-                                <Form.Group className="mb-3" controlId="correo">
-                                    <Form.Label>Correo</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        value={datosProfesor.email}
-                                        name="correo"
-                                        disabled={!false}
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="nombre">
-                                    <Form.Label>Nombre</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={datosProfesor.nombre}
-                                        onChange={handleProfesor}
-                                        name="nombre"
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="cambioContraseña">
-                                    <Form.Label>Nueva contraseña</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={cambioContraseña.nuevaContraseña}
-                                        onChange={handleChangePassword}
-                                        name="nuevaContraseña"
-                                    />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="confirmacionContraseña">
-                                    <Form.Label>Confirmar contraseña</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={cambioContraseña.confirmacionContraseña}
-                                        onChange={handleChangePassword}
-                                        name="confirmacionContraseña"
-                                    />
-                                </Form.Group>
-                                <div className="btn_container2">
-                                    <Button variant="primary" type="Submit">
-                                        Modificar
-                                    </Button>
-                                </div>
+                        </Form.Group>
+                        <Form.Group as={Row} controlId="confirmacionContraseña" className="mb-3">
+                            <Form.Label column sm="3">
+                                Confirmar Contraseña:
+                            </Form.Label>
+                            <Col sm="9">
+                                <Form.Control
+                                    type="password"
+                                    name="confirmacionContraseña"
+                                    value={cambioContraseña.confirmacionContraseña}
+                                    onChange={handleChangePassword}
+                                    placeholder="Confirma tu nueva contraseña"
+                                    required
+                                />
                             </Col>
-                        </Row>
-                    </Form>}
+                        </Form.Group>
+                        <Button type="submit" className="mb-3">Cambiar Contraseña</Button>
+                    </Form>
                     <ToastContainer />
                 </>
+            ) : (
+                <p>Cargando datos...</p>
             )}
-        </>
-
-    )
+        </div>
+    );
 }
-export default Usuario
+
+export default Usuario;
