@@ -21,6 +21,7 @@ function Solicitar() {
     const [usuarios, setUsuarios] = useState([]);
     const userEmail = user && user.email ? user.email : '';
     const storage = getStorage();
+    const [downloadComplete, setDownloadComplete] = useState(false);
 
     const [datosUsuario, setDatosUsuario] = useState(
         {
@@ -188,10 +189,17 @@ function Solicitar() {
             await uploadBytes(storageRef, file);
 
             const downloadURL = await getDownloadURL(storageRef);
-
-            setArchivo(downloadURL);
+            if (downloadURL) {
+                setDownloadComplete(true);
+                setArchivo(downloadURL);
+            } else {
+                setDownloadComplete(false);
+            }
         } catch (error) {
-            console.error("Error al subir el archivo o obtener la URL de descarga:", error);
+            console.error(
+                "Error al subir el archivo o obtener la URL de descarga:",
+                error
+            );
             throw error;
         }
     };
@@ -255,7 +263,6 @@ function Solicitar() {
                 await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
                 setSolicitudes([nuevaSolicitud, ...solicitudes,]);
                 setArchivo("")
-                //setHorarioAux(horario)
                 toast.success("Solicitud enviada exitosamente.");
                 cerrarModal()
 
@@ -775,9 +782,27 @@ function Solicitar() {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button id="botonAceptar" form="form1" variant="success" type="submit" onClick={agregarSolicitud}>
-                        Aceptar
-                    </Button>
+                    {downloadComplete ? (
+                        <Button
+                            id="botonAceptar"
+                            form="form1"
+                            variant="success"
+                            type="submit"
+                            onClick={agregarSolicitud}
+                        >
+                            Aceptar
+                        </Button>
+                    ) : (
+                        <Button
+                            id="botonAceptar"
+                            form="form1"
+                            variant="success"
+                            type="submit"
+                            disabled
+                        >
+                            Aceptar
+                        </Button>
+                    )}
                     <Button variant="secondary" onClick={cerrarModal}>
                         Cancelar
                     </Button>{" "}

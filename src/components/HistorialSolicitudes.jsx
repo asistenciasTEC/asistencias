@@ -19,7 +19,7 @@ const HistorialSolicitudes = () => {
 
     const [archivo, setArchivo] = useState("");
 
-    const [horarioNuevo, setHorarioNuevo] = useState({});
+    //const [horarioNuevo, setHorarioNuevo] = useState({});
 
     const [solicitudes, setSolicitudes] = useState([]);
     const [asistencias, setAsistencias] = useState([]);
@@ -84,7 +84,7 @@ const HistorialSolicitudes = () => {
         profesorAsistir,
         cursoAsistir,
         notaCursoAsistir,
-        horario,
+        //horario,
     } = dataForm;
 
     const handleChange = (e) => {
@@ -219,33 +219,42 @@ const HistorialSolicitudes = () => {
         setShowModal(false);
     };
 
+    const [horarioAux, setHorarioAux] = useState({
+        lunes: [],
+        martes: [],
+        miercoles: [],
+        jueves: [],
+        viernes: [],
+        sabado: []
+    });
+
+    const handleCheckboxChange = (dia, intervalo) => {
+        const isChecked = horarioAux[dia].includes(intervalo);
+        if (isChecked) {
+            setHorarioAux((prevHorarioAux) => ({
+                ...prevHorarioAux,
+                [dia]: prevHorarioAux[dia].filter((i) => i !== intervalo)
+            }));
+        } else {
+            setHorarioAux((prevHorarioAux) => ({
+                ...prevHorarioAux,
+                [dia]: [...prevHorarioAux[dia], intervalo]
+            }));
+        }
+    };
+
+    const marcarCasillasHorario = (horario) => {
+        const checkboxes = document.querySelectorAll("#horario input[type='checkbox']");
+
+        checkboxes.forEach((checkbox) => {
+            const [dia, intervalo] = checkbox.id.split("-");
+            const isChecked = horario[dia].includes(intervalo);
+            checkbox.checked = isChecked;
+        });
+    };
+
     const editarSolicitud = async (e) => {
         e.preventDefault();
-        if (tipoAsistencia === "Horas Estudiantes") {
-            var horarioAux = {
-                lunes: [],
-                martes: [],
-                miercoles: [],
-                jueves: [],
-                viernes: [],
-                sabado: []
-            };
-            var filas = document.querySelectorAll("#horario tbody tr");
-            filas.forEach(function (fila) {
-                var celdas = fila.querySelectorAll("td");
-                var intervalo = celdas[0].textContent.trim();
-
-                for (var i = 1; i < celdas.length; i++) {
-                    var checkbox = celdas[i].querySelector("input[type='checkbox']");
-                    var dia = Object.keys(horarioAux)[i - 1];
-                    if (checkbox.checked) {
-                        horarioAux[dia].push(intervalo);
-                    }
-                }
-            });
-            setHorarioNuevo(horarioAux)
-        }
-
         const solicitudActualizada = {
             tipoAsistencia,
             promedioPondSemAnt,
@@ -253,7 +262,7 @@ const HistorialSolicitudes = () => {
             profesorAsistir,
             cursoAsistir,
             notaCursoAsistir,
-            horario: tipoAsistencia === "Horas Estudiantes" ? horarioNuevo : horario,
+            horario: horarioAux,
             boleta: archivo
         };
         const q = query(collection(db, "solicitudes"), where("id", "==", id));
@@ -273,7 +282,7 @@ const HistorialSolicitudes = () => {
         );
         setSolicitudes(listaSolicitudsActualizada);
         setArchivo("")
-        setHorarioNuevo({})
+        //setHorarioNuevo({})
     };
 
     const eliminarSolicitud = async (id) => {
@@ -740,64 +749,136 @@ const HistorialSolicitudes = () => {
                                             <tr>
                                                 <td>07:00 - 12:00</td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.lunes.includes("07:00 - 12:00")}
+                                                        onChange={() => handleCheckboxChange("lunes", "07:00 - 12:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.martes.includes("07:00 - 12:00")}
+                                                        onChange={() => handleCheckboxChange("martes", "07:00 - 12:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.miercoles.includes("07:00 - 12:00")}
+                                                        onChange={() => handleCheckboxChange("miercoles", "07:00 - 12:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.jueves.includes("07:00 - 12:00")}
+                                                        onChange={() => handleCheckboxChange("jueves", "07:00 - 12:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.viernes.includes("07:00 - 12:00")}
+                                                        onChange={() => handleCheckboxChange("viernes", "07:00 - 12:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.sabado.includes("07:00 - 12:00")}
+                                                        onChange={() => handleCheckboxChange("sabado", "07:00 - 12:00")}
+                                                    />
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td>12:00 - 17:00</td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.lunes.includes("12:00 - 17:00")}
+                                                        onChange={() => handleCheckboxChange("lunes", "12:00 - 17:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.martes.includes("12:00 - 17:00")}
+                                                        onChange={() => handleCheckboxChange("martes", "12:00 - 17:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.miercoles.includes("12:00 - 17:00")}
+                                                        onChange={() => handleCheckboxChange("miercoles", "12:00 - 17:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.jueves.includes("12:00 - 17:00")}
+                                                        onChange={() => handleCheckboxChange("jueves", "12:00 - 17:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.viernes.includes("12:00 - 17:00")}
+                                                        onChange={() => handleCheckboxChange("viernes", "12:00 - 17:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.sabado.includes("12:00 - 17:00")}
+                                                        onChange={() => handleCheckboxChange("sabado", "12:00 - 17:00")}
+                                                    />
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td>17:00 - 22:00</td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.lunes.includes("17:00 - 22:00")}
+                                                        onChange={() => handleCheckboxChange("lunes", "17:00 - 22:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.martes.includes("17:00 - 22:00")}
+                                                        onChange={() => handleCheckboxChange("martes", "17:00 - 22:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.miercoles.includes("17:00 - 22:00")}
+                                                        onChange={() => handleCheckboxChange("miercoles", "17:00 - 22:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.jueves.includes("17:00 - 22:00")}
+                                                        onChange={() => handleCheckboxChange("jueves", "17:00 - 22:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.viernes.includes("17:00 - 22:00")}
+                                                        onChange={() => handleCheckboxChange("viernes", "17:00 - 22:00")}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <Form.Check type="checkbox" />
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={horarioAux.sabado.includes("17:00 - 22:00")}
+                                                        onChange={() => handleCheckboxChange("sabado", "17:00 - 22:00")}
+                                                    />
                                                 </td>
                                             </tr>
                                         </tbody>
