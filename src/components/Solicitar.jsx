@@ -667,7 +667,7 @@ function Solicitar() {
                                 </Form.Group>
 
                                 <Form.Group controlId="créditosAproSemAnt">
-                                    <Form.Label>Creditos Aprobados Semestre Anterior</Form.Label>
+                                    <Form.Label>Créditos Aprobados Semestre Anterior</Form.Label>
                                     <Form.Control
                                         type="number"
                                         value={créditosAproSemAnt}
@@ -677,7 +677,7 @@ function Solicitar() {
                             </>
 
                         )}
-                        {tipoAsistencia === 'Tutoria Estudiantil' && (
+                        {tipoAsistencia === 'Tutoría Estudiantil' && (
                             <>
                                 <Form.Group controlId="cursoAsistir">
                                     <Form.Label>Curso a Asistir</Form.Label>

@@ -1,5 +1,6 @@
 body {
     background-color: white;
+    overflow: hidden;
 }
 
 /* Navbar    */
@@ -10,6 +11,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
 }
 
 .NavContainer h2 {
@@ -56,12 +58,15 @@ body {
     justify-content: center;
 }
 
+
 section {
+
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
+
 }
 
 .form {
@@ -203,7 +208,7 @@ input {
     height: 100vh;
 }
 
-.containerToTitleAndSearch{
+.containerToTitleAndSearch {
     display: flex;
     justify-content: space-between;
     align-items: center;
