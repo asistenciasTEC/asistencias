@@ -89,46 +89,36 @@ function Asistentes() {
   };
 
   useEffect(() => {
-    if (!asistentesBandera) {
-      const cargarProfesores = async () => {
-        const q = query(
-          collection(db, "profesores"),
-          where("email", "==", usuarioAuthentication.email)
-        );
-        const st = await getDocs(q);
-        const profe = st.docs.map((prof) => ({
-          ...prof.data(),
-        }));
-        setProfesor(profe);
-        setProfesoresCargados(true);
-      };
-      cargarProfesores();
-    }
+    const obtenerProfesores = async () => {
+      const queryProfesoresCollection = query(
+        collection(db, "profesores"),
+        where("email", "==", usuarioAuthentication.email)
+      );
+      const snapshot = await getDocs(queryProfesoresCollection);
+      const listaProfesores = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+      }));
+      return listaProfesores;
+      // setProfesor(listaProfesores);
+    };
+
+    const obtenerSolicitudes = async () => {
+      const profe = await obtenerProfesores();
+      const querySolicitudesCollection = query(
+        collection(db, "solicitudes"),
+        where("profesorAsistir", "==", profe[0].nombre),
+        where("condicion", "==", "Aceptado")
+      );
+      const snapshot = await getDocs(querySolicitudesCollection);
+      const listaAsistencias = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+      }));
+      setAsistentes(listaAsistencias);
+    };
+
+    obtenerSolicitudes();
   }, []);
 
-  useEffect(() => {
-    if (profesoresCargados) {
-      const obtenerSolicitudes = async () => {
-        const profesorEncontrado = profesores.find(
-          (profesor) => profesor.email === usuarioAuthentication.email
-        );
-
-        const querySolicitudesCollection = query(
-          collection(db, "solicitudes"),
-          where("profesorAsistir", "==", profesorEncontrado.nombre),
-          where("condicion", "==", "Aceptado")
-        );
-        const snapshot = await getDocs(querySolicitudesCollection);
-        const listaAsistentes = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-        }));
-        setAsistentes(listaAsistentes);
-        setProfesoresCargados(false);
-        setAsistentesBandera(true);
-      };
-      obtenerSolicitudes();
-    }
-  }, []);
 
   return (
     <>

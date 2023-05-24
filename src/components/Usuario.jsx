@@ -167,7 +167,7 @@ function Usuario() {
 
 
     return (
-        <div style={{ marginLeft: '20px', marginRight: '20px'}}>
+        <div style={{ marginLeft: '20px', marginRight: '20px', height:'110vh'}}>
             {datosCargados ? (
                 <>
                     <h2>Perfil de Usuario</h2>
