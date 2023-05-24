@@ -30,7 +30,7 @@ function Requisitos() {
                         <th>Promedio Ponderado</th>
                         <th>Nota Curso Aprobado</th>
                         <th>Semestres Activos</th>
-                        <th>Creditos Aprobados</th>
+                        <th>Créditos Aprobados</th>
                     </tr>
                 </thead>
                 <tbody>
