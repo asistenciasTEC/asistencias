@@ -13,7 +13,7 @@ function Asistentes() {
   const [asistentesBandera, setAsistentesBandera] = useState(false);
   const [valorSeleccionado, setValorSeleccionado] = useState("");
   const [resultados, setResultados] = useState([]);
-  //Paginación
+
   //Paginación
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -103,9 +103,8 @@ function Asistentes() {
         setProfesoresCargados(true);
       };
       cargarProfesores();
-      console.log("Prueba")
     }
-  });
+  }, []);
 
   useEffect(() => {
     if (profesoresCargados) {

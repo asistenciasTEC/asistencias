@@ -61,7 +61,7 @@ function Usuario() {
 
         obtenerProfesores();
         obtenerUsuarios();
-    }, [user.email]);
+    }, []);
 
     useEffect(() => {
         const usuarioEncontrado = usuarios.find((usuario) => usuario.correo === userEmail);

@@ -55,7 +55,7 @@ const HistorialSolicitudes = () => {
 
     const [showModalMoreInfo, setShowModalMoreInfo] = useState(false);
     const [solicitudInfo, setSolicitudInfo] = useState("");
-
+    const [downloadComplete, setDownloadComplete] = useState(false);
     const [showModalEliminar, setShowModalEliminar] = useState(false);
     const [solicitudAEliminar, setSolicitudAELiminar] = useState("");
 
@@ -102,10 +102,12 @@ const HistorialSolicitudes = () => {
             await uploadBytes(storageRef, file);
 
             const downloadURL = await getDownloadURL(storageRef);
-
-            console.log("URL de descarga:", downloadURL);
-
-            setArchivo(downloadURL);
+            if (downloadURL) {
+                setDownloadComplete(true);
+                setArchivo(downloadURL);
+            } else {
+                setDownloadComplete(false);
+            }
         } catch (error) {
             console.error("Error al subir el archivo o obtener la URL de descarga:", error);
             throw error;
@@ -152,7 +154,7 @@ const HistorialSolicitudes = () => {
         obtenerAsistencias();
         obtenerCursos();
         obtenerProfesores();
-    },);
+    }, []);
 
     //More Info
     const abrirModalInfo = (id) => {
@@ -243,16 +245,6 @@ const HistorialSolicitudes = () => {
         }
     };
 
-    const marcarCasillasHorario = (horario) => {
-        const checkboxes = document.querySelectorAll("#horario input[type='checkbox']");
-
-        checkboxes.forEach((checkbox) => {
-            const [dia, intervalo] = checkbox.id.split("-");
-            const isChecked = horario[dia].includes(intervalo);
-            checkbox.checked = isChecked;
-        });
-    };
-
     const editarSolicitud = async (e) => {
         e.preventDefault();
         const solicitudActualizada = {
@@ -282,6 +274,7 @@ const HistorialSolicitudes = () => {
         );
         setSolicitudes(listaSolicitudsActualizada);
         setArchivo("")
+        setDownloadComplete(false);
         //setHorarioNuevo({})
     };
 
@@ -1045,12 +1038,20 @@ const HistorialSolicitudes = () => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={cerrarModal}>
+                    <Button variant="secondary" onClick={() => { cerrarModal(); setDownloadComplete(false); }}>
                         Cancelar
-                    </Button>{" "}
-                    <Button id="botonEditar" form="form1" variant="success" type="submit" onClick={handleUpdateClick}>
-                        Guardar cambios
                     </Button>
+                    {" "}
+                    {downloadComplete ? (
+                        <Button id="botonEditar" form="form1" variant="success" type="submit" onClick={handleUpdateClick}>
+                            Guardar cambios
+                        </Button>
+                    ) : (
+                        <Button id="botonEditar" form="form1" variant="success" type="submit" disabled>
+                            Guardar cambios
+                        </Button>
+                    )}
+
                 </Modal.Footer>
             </Modal>
             <ToastContainer />
