@@ -95,11 +95,16 @@ const HistorialSolicitudes = () => {
     const handleFileChange = async (e) => {
         try {
             const file = e.target.files[0];
-            const storageRef = ref(storage, "boletasEstudiantes/" + file.name);
+
+            const storageRef = ref(
+                storage,
+                `${dataForm.idPeriodo}/${file.name}`
+            );
 
             await uploadBytes(storageRef, file);
 
             const downloadURL = await getDownloadURL(storageRef);
+
             if (downloadURL) {
                 setDownloadComplete(true);
                 setArchivo(downloadURL);
@@ -107,7 +112,10 @@ const HistorialSolicitudes = () => {
                 setDownloadComplete(false);
             }
         } catch (error) {
-            console.error("Error al subir el archivo o obtener la URL de descarga:", error);
+            console.error(
+                "Error al subir el archivo o al obtener la URL de descarga:",
+                error
+            );
             throw error;
         }
     };

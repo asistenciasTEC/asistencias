@@ -17,7 +17,7 @@ function Solicitar() {
     const [asistencias, setAsistencias] = useState([]);
     const [cursos, setCursos] = useState([]);
     const [profesores, setProfesores] = useState([]);
-    const [periodos, setPeriodos] = useState([]);
+    const [periodoActivo, setPeriodoActivo] = useState("");
     const storage = getStorage();
     const [downloadComplete, setDownloadComplete] = useState(false);
 
@@ -76,7 +76,6 @@ function Solicitar() {
     } = dataForm;
 
     useEffect(() => {
-
         const obtenerAsistencias = async () => {
             const asistenciasCollection = collection(db, "asistencias");
             const snapshot = await getDocs(asistenciasCollection);
@@ -110,7 +109,10 @@ function Solicitar() {
             const listaPeriodos = snapshot.docs.map((doc) => ({
                 ...doc.data(),
             }));
-            setPeriodos(listaPeriodos);
+            const hayPeriodoActivo = listaPeriodos.find((periodo) => periodo.estado);
+            if (hayPeriodoActivo) {
+                setPeriodoActivo(hayPeriodoActivo.id)
+            }
         };
 
         const obtenerUsuario = async () => {
@@ -150,34 +152,39 @@ function Solicitar() {
     };
 
     const abrirModal = (id = "") => {
-        setModalTitle("Nueva solicitud");
-        setDataForm({
-            id: "",
-            idPeriodo: "",
-            tipoAsistencia: "",
-            cedula: "",
-            carne: "",
-            apellido1: "",
-            apellido2: "",
-            nombre: "",
-            promedioPondSemAnt: "",
-            créditosAproSemAnt: "",
-            semestresActivo: "",
-            correo: "",
-            telefono: "",
-            cuentaBancaria: "",
-            cuentaIBAN: "",
-            cuentaBanco: "",
-            profesorAsistir: "",
-            cursoAsistir: "",
-            notaCursoAsistir: "",
-            horario: "",
-            boleta: "",
-            condicion: "",
-            horasAsignadas: "",
-            fecha: ""
-        });
-        setShowModal(true);
+        if (periodoActivo) {
+            setModalTitle("Nueva solicitud");
+            setDataForm({
+                id: "",
+                idPeriodo: "",
+                tipoAsistencia: "",
+                cedula: "",
+                carne: "",
+                apellido1: "",
+                apellido2: "",
+                nombre: "",
+                promedioPondSemAnt: "",
+                créditosAproSemAnt: "",
+                semestresActivo: "",
+                correo: "",
+                telefono: "",
+                cuentaBancaria: "",
+                cuentaIBAN: "",
+                cuentaBanco: "",
+                profesorAsistir: "",
+                cursoAsistir: "",
+                notaCursoAsistir: "",
+                horario: "",
+                boleta: "",
+                condicion: "",
+                horasAsignadas: "",
+                fecha: ""
+            });
+            setShowModal(true);
+        } else {
+            toast.error("No hay periodos activos.");
+            cerrarModal()
+        }
     };
 
     const cerrarModal = () => {
@@ -187,11 +194,16 @@ function Solicitar() {
     const handleFileChange = async (e) => {
         try {
             const file = e.target.files[0];
-            const storageRef = ref(storage, "boletasEstudiantes/" + file.name);
+
+            const storageRef = ref(
+                storage,
+                `${periodoActivo}/${file.name}`
+            );
 
             await uploadBytes(storageRef, file);
 
             const downloadURL = await getDownloadURL(storageRef);
+
             if (downloadURL) {
                 setDownloadComplete(true);
                 setArchivo(downloadURL);
@@ -233,48 +245,42 @@ function Solicitar() {
 
     const agregarSolicitud = async (e) => {
         e.preventDefault();
-        const hayPeriodosActivos = periodos.find((periodo) => periodo.estado);
-        if (hayPeriodosActivos) {
-            try {
-                const nuevaSolicitud = {
-                    id: uuid(),
-                    idPeriodo: hayPeriodosActivos.id,
-                    tipoAsistencia,
-                    cedula: datosUsuario.cedula,
-                    carne: datosUsuario.carne,
-                    apellido1: datosUsuario.apellido1,
-                    apellido2: datosUsuario.apellido2,
-                    nombre: datosUsuario.nombre,
-                    promedioPondSemAnt,
-                    créditosAproSemAnt,
-                    semestresActivo,
-                    correo: datosUsuario.correo,
-                    telefono: datosUsuario.telefono,
-                    tipoCuenta: datosUsuario.cuentaBancaria,
-                    cuentaIBAN: datosUsuario.cuentaIBAN,
-                    cuentaBancaria: datosUsuario.cuentaBanco,
-                    profesorAsistir,
-                    cursoAsistir,
-                    notaCursoAsistir,
-                    horario: horarioAux,
-                    boleta: archivo,
-                    condicion: "Pendiente",
-                    horasAsignadas,
-                    fecha: serverTimestamp()
-                };
-                await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
-                setSolicitudes([nuevaSolicitud, ...solicitudes,]);
-                setArchivo("")
-                toast.success("Solicitud enviada exitosamente.");
-                setDownloadComplete(false);
-                cerrarModal()
-
-            } catch (error) {
-                console.error("Error al obtener la URL de descarga:", error);
-            }
-        } else {
-            toast.error("No hay periodos activos.");
+        try {
+            const nuevaSolicitud = {
+                id: uuid(),
+                idPeriodo: periodoActivo,
+                tipoAsistencia,
+                cedula: datosUsuario.cedula,
+                carne: datosUsuario.carne,
+                apellido1: datosUsuario.apellido1,
+                apellido2: datosUsuario.apellido2,
+                nombre: datosUsuario.nombre,
+                promedioPondSemAnt,
+                créditosAproSemAnt,
+                semestresActivo,
+                correo: datosUsuario.correo,
+                telefono: datosUsuario.telefono,
+                tipoCuenta: datosUsuario.cuentaBancaria,
+                cuentaIBAN: datosUsuario.cuentaIBAN,
+                cuentaBancaria: datosUsuario.cuentaBanco,
+                profesorAsistir,
+                cursoAsistir,
+                notaCursoAsistir,
+                horario: horarioAux,
+                boleta: archivo,
+                condicion: "Pendiente",
+                horasAsignadas,
+                fecha: serverTimestamp()
+            };
+            await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
+            setSolicitudes([nuevaSolicitud, ...solicitudes,]);
+            setArchivo("")
+            toast.success("Solicitud enviada exitosamente.");
+            setDownloadComplete(false);
             cerrarModal()
+
+        } catch (error) {
+            console.error("Error al obtener la URL de descarga:", error);
         }
     };
 
