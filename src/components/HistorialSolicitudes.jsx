@@ -634,7 +634,7 @@ const HistorialSolicitudes = () => {
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="cedula">
-                                    <Form.Label>Cedula</Form.Label>
+                                    <Form.Label>Cédula</Form.Label>
                                     <Form.Control
                                         type="number"
                                         value={cedula}
@@ -673,7 +673,7 @@ const HistorialSolicitudes = () => {
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="correo">
-                                    <Form.Label>Correo</Form.Label>
+                                    <Form.Label>Correo electrónico</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={correo}
@@ -685,7 +685,7 @@ const HistorialSolicitudes = () => {
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="telefono">
-                                    <Form.Label>Telefono</Form.Label>
+                                    <Form.Label>Teléfono</Form.Label>
                                     <Form.Control
                                         type="number"
                                         value={telefono}

@@ -75,7 +75,7 @@ const Login = () => {
         } else if (email === "vargasdaniel195@gmail.com") {
             setData({
                 ...data,
-                errorButton1: "El correo ingresado no tiene permisos de acceso a esta página",
+                errorButton1: "El correo electrónico ingresado no tiene permisos de acceso a esta página",
                 loading: false,
             });
         } else {
@@ -98,13 +98,13 @@ const Login = () => {
                 } else if (error.message === "Firebase: Error (auth/wrong-password).") {
                     setData({
                         ...data,
-                        errorButton1: "La contraseña o el correo electrónico ingresados son incorrectos, por favor verificalos",
+                        errorButton1: "La contraseña o el correo electrónico ingresados son incorrectos, por favor verifícalos",
                         loading: false
                     });
                 } else {
                     setData({
                         ...data,
-                        errorButton1: "A ocurrido un error inesperado por favor recarga la pagina y vuelve a intentarlo",
+                        errorButton1: "A ocurrido un error inesperado por favor recarga la página y vuelve a intentarlo",
                         loading: false
                     });
                 }
@@ -118,10 +118,10 @@ const Login = () => {
     const restablecerContraseña = async (e) => {
         sendPasswordResetEmail(auth, email)
             .then(() => {
-                toast.success("Se envio un correo de restablecimiento de contraseña");
+                toast.success("Se envío un correo electrónico de restablecimiento de contraseña");
             })
             .catch((error) => {
-                toast.error("Tiene que añadir un correo en el espacio designado");
+                toast.error("Tiene que añadir un correo electrónico en el espacio designado");
             });
     };
 
@@ -222,10 +222,10 @@ const Login = () => {
                             <Row>
                                 <Col>
                                     <Form.Group className="mb-3" controlId="correo">
-                                        <Form.Label>Correo</Form.Label>
+                                        <Form.Label>Correo electrónico</Form.Label>
                                         <Form.Control
                                             type="email"
-                                            placeholder="Escribe el correo"
+                                            placeholder="Escribe el correo electrónico"
                                             value={correo}
                                             onChange={handleRegistro}
                                             name="correo"
@@ -366,7 +366,7 @@ const Login = () => {
                                     cerrarModal();
                                     setDataForm({ ...dataForm, errorButton2: null });
                                 }}>
-                                    Atras
+                                    Atrás
                                 </Button>
                                 <Button variant="primary" type="Submit" disabled={loading2}>
                                     {loading2 ? "Registrando..." : "Registrar"}
