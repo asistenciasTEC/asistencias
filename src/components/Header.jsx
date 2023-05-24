@@ -40,8 +40,6 @@ function Header() {
         }, 1000);
     }, []);
 
-
-
     const handleRoute = () => {
         history('/usuario');
     };

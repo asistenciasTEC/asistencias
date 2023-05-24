@@ -128,7 +128,7 @@ function Asistentes() {
       };
       obtenerSolicitudes();
     }
-  });
+  }, []);
 
   return (
     <>

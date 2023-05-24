@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { collection, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, orderBy, where, serverTimestamp } from "firebase/firestore";
 import { Table, Modal, Form, Button, Row, Col } from "react-bootstrap";
 import { db } from "../config/firebase/firebase";
 import { v4 as uuid } from "uuid";
@@ -18,25 +18,22 @@ function Solicitar() {
     const [cursos, setCursos] = useState([]);
     const [profesores, setProfesores] = useState([]);
     const [periodos, setPeriodos] = useState([]);
-    const [usuarios, setUsuarios] = useState([]);
-    const userEmail = user && user.email ? user.email : '';
     const storage = getStorage();
     const [downloadComplete, setDownloadComplete] = useState(false);
 
-    const [datosUsuario, setDatosUsuario] = useState(
-        {
-            nombre: "",
-            correo: "",
-            apellido1: "",
-            apellido2: "",
-            cedula: "",
-            carne: "",
-            telefono: "",
-            cuentaBancaria: "",
-            cuentaIBAN: "",
-            cuentaBanco: "",
-            password2: ""
-        });
+    const [datosUsuario, setDatosUsuario] = useState({
+        nombre: "",
+        correo: "",
+        apellido1: "",
+        apellido2: "",
+        cedula: "",
+        carne: "",
+        telefono: "",
+        cuentaBancaria: "",
+        cuentaIBAN: "",
+        cuentaBanco: "",
+        password2: ""
+    });
 
     const [dataForm, setDataForm] = useState({
         id: "",
@@ -79,65 +76,72 @@ function Solicitar() {
     } = dataForm;
 
     useEffect(() => {
-        const obtenerDatos = async () => {
-            try {
-                const asistenciasCollection = collection(db, "asistencias");
-                const profesoresCollection = collection(db, "profesores");
-                const cursosCollection = collection(db, "cursos");
-                const periodosCollection = collection(db, "periodos");
-                const usuariosCollection = collection(db, "usuarios");
 
-                const [asistenciasSnapshot, profesoresSnapshot, cursosSnapshot, periodosSnapshot, usuariosSnapshot] = await Promise.all([
-                    getDocs(asistenciasCollection),
-                    getDocs(profesoresCollection),
-                    getDocs(cursosCollection),
-                    getDocs(periodosCollection),
-                    getDocs(usuariosCollection)
-                ]);
-
-                const listaAsistencias = [];
-                asistenciasSnapshot.forEach((doc) => {
-                    listaAsistencias.push(doc.data());
-                });
-                setAsistencias(listaAsistencias);
-
-                const listaProfesores = [];
-                profesoresSnapshot.forEach((doc) => {
-                    listaProfesores.push(doc.data());
-                });
-                setProfesores(listaProfesores);
-
-                const listaCursos = [];
-                cursosSnapshot.forEach((doc) => {
-                    listaCursos.push(doc.data());
-                });
-                setCursos(listaCursos);
-
-                const listaPeriodos = [];
-                periodosSnapshot.forEach((doc) => {
-                    listaPeriodos.push(doc.data());
-                });
-                setPeriodos(listaPeriodos);
-
-                const listaUsuarios = [];
-                usuariosSnapshot.forEach((doc) => {
-                    listaUsuarios.push(doc.data());
-                });
-                setUsuarios(listaUsuarios);
-            } catch (error) {
-                console.error("Error al obtener los datos:", error);
-            }
+        const obtenerAsistencias = async () => {
+            const asistenciasCollection = collection(db, "asistencias");
+            const snapshot = await getDocs(asistenciasCollection);
+            const listaAsistencias = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setAsistencias(listaAsistencias);
         };
-        obtenerDatos();
+
+        const obtenerProfesores = async () => {
+            const profesoresCollection = collection(db, "profesores");
+            const snapshot = await getDocs(profesoresCollection);
+            const listaProfesores = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setProfesores(listaProfesores);
+        };
+
+        const obtenerCursos = async () => {
+            const cursosCollection = collection(db, "cursos");
+            const snapshot = await getDocs(cursosCollection);
+            const listaCursos = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setCursos(listaCursos);
+        };
+
+        const obtenerPeriodos = async () => {
+            const queryPeriodosCollection = query(collection(db, "periodos"), orderBy("fecha", "desc"));
+            const snapshot = await getDocs(queryPeriodosCollection);
+            const listaPeriodos = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+            setPeriodos(listaPeriodos);
+        };
+
+        const obtenerUsuario = async () => {
+            const queryUsuariosCollection = query(collection(db, "usuarios"), where("correo", "==", user.email));
+            const snapshot = await getDocs(queryUsuariosCollection);
+            const listaUsuarios = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+            }));
+
+            setDatosUsuario({
+                nombre: listaUsuarios[0].nombre,
+                correo: listaUsuarios[0].correo,
+                apellido1: listaUsuarios[0].apellido1,
+                apellido2: listaUsuarios[0].apellido2,
+                cedula: listaUsuarios[0].cedula,
+                carne: listaUsuarios[0].carne,
+                telefono: listaUsuarios[0].telefono,
+                cuentaBancaria: listaUsuarios[0].cuentaBancaria,
+                cuentaIBAN: listaUsuarios[0].cuentaIBAN,
+                cuentaBanco: listaUsuarios[0].cuentaBanco,
+                password2: listaUsuarios[0].password2,
+            });
+            console.log(datosUsuario);
+        };
+
+        obtenerAsistencias();
+        obtenerProfesores();
+        obtenerCursos();
+        obtenerPeriodos();
+        obtenerUsuario();
     }, []);
-
-    useEffect(() => {
-        const usuarioEncontrado = usuarios.find(usuario => usuario.correo === userEmail);
-        if (usuarioEncontrado && usuarioEncontrado !== datosUsuario) {
-            setDatosUsuario(usuarioEncontrado);
-        }
-    }, [usuarios, userEmail, datosUsuario]);
-
 
     const handleChange = (e) => {
         setDataForm({
