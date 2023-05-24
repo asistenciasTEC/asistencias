@@ -19,8 +19,6 @@ const HistorialSolicitudes = () => {
 
     const [archivo, setArchivo] = useState("");
 
-    //const [horarioNuevo, setHorarioNuevo] = useState({});
-
     const [solicitudes, setSolicitudes] = useState([]);
     const [asistencias, setAsistencias] = useState([]);
     const [cursos, setCursos] = useState([]);
@@ -84,7 +82,7 @@ const HistorialSolicitudes = () => {
         profesorAsistir,
         cursoAsistir,
         notaCursoAsistir,
-        //horario,
+        condicion
     } = dataForm;
 
     const handleChange = (e) => {
@@ -200,6 +198,7 @@ const HistorialSolicitudes = () => {
             nombre: solicitud.nombre,
             promedioPondSemAnt: solicitud.promedioPondSemAnt,
             créditosAproSemAnt: solicitud.créditosAproSemAnt,
+            semestresActivo: solicitud.semestresActivo,
             correo: solicitud.correo,
             telefono: solicitud.telefono,
             cuentaBancaria: solicitud.cuentaBancaria,
@@ -254,6 +253,8 @@ const HistorialSolicitudes = () => {
             profesorAsistir,
             cursoAsistir,
             notaCursoAsistir,
+            semestresActivo,
+            condicion,
             horario: horarioAux,
             boleta: archivo
         };
@@ -275,7 +276,6 @@ const HistorialSolicitudes = () => {
         setSolicitudes(listaSolicitudsActualizada);
         setArchivo("")
         setDownloadComplete(false);
-        //setHorarioNuevo({})
     };
 
     const eliminarSolicitud = async (id) => {

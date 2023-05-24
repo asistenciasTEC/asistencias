@@ -133,7 +133,6 @@ function Solicitar() {
                 cuentaBanco: listaUsuarios[0].cuentaBanco,
                 password2: listaUsuarios[0].password2,
             });
-            console.log(datosUsuario);
         };
 
         obtenerAsistencias();
@@ -237,7 +236,6 @@ function Solicitar() {
         const hayPeriodosActivos = periodos.find((periodo) => periodo.estado);
         if (hayPeriodosActivos) {
             try {
-                console.log(horarioAux)
                 const nuevaSolicitud = {
                     id: uuid(),
                     idPeriodo: hayPeriodosActivos.id,
