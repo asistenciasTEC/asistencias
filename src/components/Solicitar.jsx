@@ -264,6 +264,7 @@ function Solicitar() {
                 setSolicitudes([nuevaSolicitud, ...solicitudes,]);
                 setArchivo("")
                 toast.success("Solicitud enviada exitosamente.");
+                setDownloadComplete(false);
                 cerrarModal()
 
             } catch (error) {
@@ -803,7 +804,7 @@ function Solicitar() {
                             Aceptar
                         </Button>
                     )}
-                    <Button variant="secondary" onClick={cerrarModal}>
+                    <Button variant="secondary" onClick={() => { cerrarModal(); setDownloadComplete(false); }}>
                         Cancelar
                     </Button>{" "}
                 </Modal.Footer>

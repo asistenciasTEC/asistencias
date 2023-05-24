@@ -38,7 +38,7 @@ function Header() {
         setTimeout(() => {
             setDatosCargados(true);
         }, 1000);
-    },);
+    }, []);
 
 
 
