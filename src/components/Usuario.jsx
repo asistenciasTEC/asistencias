@@ -255,7 +255,7 @@ function Usuario() {
 
                                 <Form.Group as={Row} controlId="cedula" className="mb-3">
                                     <Form.Label column sm="3">
-                                        Cedula:
+                                        Cédula:
                                     </Form.Label>
                                     <Col sm="9">
                                         <Form.Control
