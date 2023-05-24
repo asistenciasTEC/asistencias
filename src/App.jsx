@@ -11,6 +11,7 @@ import Solicitar from './components/Solicitar';
 import HistorialSolicitudes from './components/HistorialSolicitudes';
 import Requisitos from './components/Requisitos';
 import Asistentes from './components/Asistentes';
+import Footer from './components/footer';
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
             <Route exact path="*" element={<NotFound />} />
           </Routes>
         </Router>
+        <Footer/>
       </AuthProvider>
     </>
   );
