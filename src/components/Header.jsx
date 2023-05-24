@@ -6,7 +6,7 @@ import { signOut } from 'firebase/auth';
 import { MdLogout, MdManageAccounts } from "react-icons/md";
 import './styles.css';
 import { db } from "../config/firebase/firebase";
-import { collection, getDocs, query, where, } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
 function Header() {
     const [datosCargados, setDatosCargados] = useState(false);
@@ -17,28 +17,33 @@ function Header() {
         history("/login");
     }
 
-    const [bandera, setBandera] = useState();
-
+    const [bandera, setBandera] = useState(false);
+    const userEmail = user && user.email ? user.email : '';
+    const [usuarios, setUsuarios] = useState([].sort());
 
     useEffect(() => {
         const obtenerUsuarios = async () => {
-            const queryUsuariosCollection = query(collection(db, "usuarios"), where("correo", "==", user.email));
-            const snapshot = await getDocs(queryUsuariosCollection);
+            const usuariosCollection = collection(db, "usuarios");
+            const snapshot = await getDocs(usuariosCollection);
             const listaUsuarios = snapshot.docs.map((doc) => ({
                 ...doc.data(),
             }));
-
-            if (listaUsuarios.length > 0) {
-                setBandera(true);
-            } else {
-                setBandera(false);
-            }
+            setUsuarios(listaUsuarios);
         };
         obtenerUsuarios();
         setTimeout(() => {
             setDatosCargados(true);
         }, 1000);
     }, []);
+
+    useEffect(() => {
+        const usuarioEncontrado = usuarios.find(usuario => usuario.correo === userEmail);
+        if (usuarioEncontrado) {
+            setBandera(true);
+        } else {
+            setBandera(false);
+        }
+    }, [usuarios, userEmail]);
 
     const handleRoute = () => {
         history('/usuario');
