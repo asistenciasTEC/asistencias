@@ -1,6 +1,5 @@
 body {
     background-color: white;
-    overflow: hidden;
 }
 
 /* Navbar    */
@@ -11,7 +10,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
 }
 
 .NavContainer h2 {
@@ -58,15 +56,12 @@ body {
     justify-content: center;
 }
 
-
 section {
-
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
-
 }
 
 .form {
@@ -214,35 +209,25 @@ input {
     align-items: center;
 }
 
-.footercito {
+.footer {
+    background-color: #02457c;
+    color: white;
     position: fixed;
     bottom: 0;
     width: 100%;
-    text-align: center;
+    display: flex;
+    justify-items: center;
 }
 
-.containerF {
-    display: flex;
-    justify-content: space-between;
-}
 
-.containerDevelopers {
+.containerD {
     display: flex;
-    align-items: center;
     margin: 0 auto;
-}
-
-.containerDevelopers p{
-    padding: 10px;
     
 }
 
-.title{
-    font-weight: bold;
-}
-
-.contact {
-    padding: 10px;
+.containerD p{
+    padding: 0 10px;
 }
 
 .copyR {
