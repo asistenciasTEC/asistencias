@@ -72,7 +72,7 @@ const Login = () => {
                 errorButton1: "Todos los campos son obligatorios",
                 loading: false
             });
-        } else if (email === "vargasdaniel195@gmail.com") {
+        } else if (email === "tec.asistencias@gmail.com" || email === "aesquivel@itcr.ac.cr") {
             setData({
                 ...data,
                 errorButton1: "El correo electrónico ingresado no tiene permisos de acceso a esta página",
