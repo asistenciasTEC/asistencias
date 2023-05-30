@@ -21,24 +21,24 @@ function App() {
         <Router>
           <Header />
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route exact path="/" element={<PrivateRoute />}>
-              <Route path="/" element={<Inicio />} />
+            <Route path="/asistencias/login" element={<Login />} />
+            <Route exact path="/asistencias/" element={<PrivateRoute />}>
+              <Route path="/asistencias/" element={<Inicio />} />
             </Route>
-            <Route exact path="/solicitar" element={<PrivateRoute />}>
-              <Route path="/solicitar" element={<Solicitar />} />
+            <Route exact path="/asistencias/solicitar" element={<PrivateRoute />}>
+              <Route path="/asistencias/solicitar" element={<Solicitar />} />
             </Route>
-            <Route exact path="/historialSolicitudes" element={<PrivateRoute />}>
-              <Route path="/historialSolicitudes" element={<HistorialSolicitudes />} />
+            <Route exact path="/asistencias/historialSolicitudes" element={<PrivateRoute />}>
+              <Route path="/asistencias/historialSolicitudes" element={<HistorialSolicitudes />} />
             </Route>
-            <Route exact path="/requisitos" element={<PrivateRoute />}>
-              <Route path="/requisitos" element={<Requisitos />} />
+            <Route exact path="/asistencias/requisitos" element={<PrivateRoute />}>
+              <Route path="/asistencias/requisitos" element={<Requisitos />} />
             </Route>
-            <Route exact path="/asistentes" element={<PrivateRoute />}>
-              <Route path="/asistentes" element={<Asistentes />} />
+            <Route exact path="/asistencias/asistentes" element={<PrivateRoute />}>
+              <Route path="/asistencias/asistentes" element={<Asistentes />} />
             </Route>
-            <Route exact path="/usuario" element={<PrivateRoute />}>
-              <Route path="/usuario" element={<Usuario />} />
+            <Route exact path="/asistencias/usuario" element={<PrivateRoute />}>
+              <Route path="/asistencias/usuario" element={<Usuario />} />
             </Route>
             <Route exact path="*" element={<NotFound />} />
           </Routes>

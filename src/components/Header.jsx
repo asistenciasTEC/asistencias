@@ -14,7 +14,7 @@ function Header() {
     const { user } = useContext(AuthContext);
     const handleSignout = async () => {
         await signOut(auth);
-        history("/login");
+        history("/asistencias/login");
     }
 
     const [bandera, setBandera] = useState(false);
@@ -46,7 +46,7 @@ function Header() {
     }, [usuarios, userEmail]);
 
     const handleRoute = () => {
-        history('/usuario');
+        history('/asistencias/usuario');
     };
 
     return (
@@ -59,11 +59,11 @@ function Header() {
                             <div className='Scroll'>
                                 {user ? (
                                     <>
-                                        <Link to="/">Inicio</Link>
-                                        {bandera && <Link to="/solicitar">Solicitar</Link>}
-                                        {bandera && <Link to="/historialSolicitudes">Historial de solicitudes</Link>}
-                                        {bandera && <Link to="/requisitos">Requisitos</Link>}
-                                        {!bandera && <Link to="/asistentes">Asistentes</Link>}
+                                        <Link to="/asistencias/">Inicio</Link>
+                                        {bandera && <Link to="/asistencias/solicitar">Solicitar</Link>}
+                                        {bandera && <Link to="/asistencias/historialSolicitudes">Historial de solicitudes</Link>}
+                                        {bandera && <Link to="/asistencias/requisitos">Requisitos</Link>}
+                                        {!bandera && <Link to="/asistencias/asistentes">Asistentes</Link>}
                                         <MdManageAccounts type="button" className="btnLogin" onClick={handleRoute} />
                                         <MdLogout type="button" className='btnLogout' onClick={handleSignout} />
                                     </>
