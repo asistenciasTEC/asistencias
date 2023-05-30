@@ -92,7 +92,7 @@ const Login = () => {
                 if (error.message === "Firebase: Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later. (auth/too-many-requests).") {
                     setData({
                         ...data,
-                        errorButton1: 'Su cuenta a sido desabilitada por la cantidad de intentos fallidos, para habilitarla cambie de contraseña con la opcion de "¿Olvido su contraseña?"',
+                        errorButton1: 'Su cuenta a sido desabilitada por la cantidad de intentos fallidos, para habilitarla cambie de contraseña con la opcion de "¿Olvidó su contraseña?"',
                         loading: false
                     });
                 } else if (error.message === "Firebase: Error (auth/wrong-password).") {
@@ -201,7 +201,7 @@ const Login = () => {
                     <div className="btn_container">
                         <button href="/" type="button" className="btn_restablecer" onClick={() => {
                             restablecerContraseña();
-                        }}>Olvidó su contraseña?</button >
+                        }}>¿Olvidó su contraseña?</button >
                     </div>
                     <div className="btn_container">
                         <button id="crear-cuenta" className="btn-success btn-sm" type="button" onClick={() => {
