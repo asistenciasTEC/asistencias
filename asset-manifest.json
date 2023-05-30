@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/asistencias/static/css/main.1f3d6915.css",
-    "main.js": "/asistencias/static/js/main.1fdef22e.js",
+    "main.js": "/asistencias/static/js/main.d142d0b0.js",
     "static/js/787.be7a9b83.chunk.js": "/asistencias/static/js/787.be7a9b83.chunk.js",
     "static/media/logo-TEC.jpg": "/asistencias/static/media/logo-TEC.7479390b43388da25b02.jpg",
     "index.html": "/asistencias/index.html",
     "main.1f3d6915.css.map": "/asistencias/static/css/main.1f3d6915.css.map",
-    "main.1fdef22e.js.map": "/asistencias/static/js/main.1fdef22e.js.map",
+    "main.d142d0b0.js.map": "/asistencias/static/js/main.d142d0b0.js.map",
     "787.be7a9b83.chunk.js.map": "/asistencias/static/js/787.be7a9b83.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.1f3d6915.css",
-    "static/js/main.1fdef22e.js"
+    "static/js/main.d142d0b0.js"
   ]
 }
