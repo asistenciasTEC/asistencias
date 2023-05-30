@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/asistencias/static/css/main.1f3d6915.css",
-    "main.js": "/asistencias/static/js/main.f7ad8b4a.js",
-    "static/js/787.be7a9b83.chunk.js": "/asistencias/static/js/787.be7a9b83.chunk.js",
-    "static/media/logo-TEC.jpg": "/asistencias/static/media/logo-TEC.7479390b43388da25b02.jpg",
-    "index.html": "/asistencias/index.html",
-    "main.1f3d6915.css.map": "/asistencias/static/css/main.1f3d6915.css.map",
-    "main.f7ad8b4a.js.map": "/asistencias/static/js/main.f7ad8b4a.js.map",
-    "787.be7a9b83.chunk.js.map": "/asistencias/static/js/787.be7a9b83.chunk.js.map"
+    "main.css": "/login/static/css/main.1f3d6915.css",
+    "main.js": "/login/static/js/main.1de221a2.js",
+    "static/js/787.be7a9b83.chunk.js": "/login/static/js/787.be7a9b83.chunk.js",
+    "static/media/logo-TEC.jpg": "/login/static/media/logo-TEC.7479390b43388da25b02.jpg",
+    "index.html": "/login/index.html",
+    "main.1f3d6915.css.map": "/login/static/css/main.1f3d6915.css.map",
+    "main.1de221a2.js.map": "/login/static/js/main.1de221a2.js.map",
+    "787.be7a9b83.chunk.js.map": "/login/static/js/787.be7a9b83.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.1f3d6915.css",
-    "static/js/main.f7ad8b4a.js"
+    "static/js/main.1de221a2.js"
   ]
 }
