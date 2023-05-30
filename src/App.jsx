@@ -21,7 +21,7 @@ function App() {
         <Router>
           <Header />
           <Routes>
-            <Route path="https://asistenciastec.github.io/asistencias-admin/login" element={<Login />} />
+            <Route path="/login" element={<Login />} />
             <Route exact path="/" element={<PrivateRoute />}>
               <Route path="/" element={<Inicio />} />
             </Route>
